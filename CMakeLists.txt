@@ -3,7 +3,7 @@
 # Contains global options and definitions
 ##
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.14)
 
 project(machines C CXX)
 include(CheckCXXCompilerFlag)
@@ -81,6 +81,9 @@ option(BUILD_32 "Builds 32 bit executable" OFF)
 
 # Compiler detection
 #set(CMAKE_CXX_COMPILER "${OMPP_CXX}" CACHE PATH "Set compiler used")
+
+# Testing
+option(BUILD_TESTS "Build the test suite" ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
@@ -220,5 +223,19 @@ endif()
 # Subdirectory with sources
 add_subdirectory(src)
 
-
-
+# TESTS
+if(BUILD_TESTS)
+    message(STATUS "Unit tests are enabled.")
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        # Specify the commit you depend on and update it regularly.
+        URL https://github.com/google/googletest/archive/refs/tags/release-1.10.0.zip
+    )
+    FetchContent_MakeAvailable(googletest)
+    if(PLATFORM_WINDOWS)
+        set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    endif(PLATFORM_WINDOWS)
+    enable_testing()
+    add_subdirectory(test)
+endif(BUILD_TESTS)
