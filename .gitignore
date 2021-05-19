@@ -17,3 +17,8 @@ CMakeUserPresets.json
 ### CMake Patch ###
 # External projects
 *-prefix/
+
+### Sourcetrail DB Files ###
+*.srctrlbm
+*.srctrldb
+

@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS_DEBUG ${MACHINES_CXX_FLAGS_DEBUG})
 file(GLOB AFX_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libdev/afx/*.cpp)
 # # # afx_lite is used with test suite
 set(AFX_LITE_SOURCES ${AFX_SOURCES})
-list(REMOVE_ITEM AFX_LITE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libdev/afx/sdlapp.cpp)
+list(REMOVE_ITEM AFX_LITE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libdev/afx/AfxSdlApp.cpp)
 
 file(GLOB BASE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libdev/base/*.cpp)
 list(REMOVE_ITEM BASE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/libdev/base/basver.cpp)

@@ -85,6 +85,9 @@ option(BUILD_32 "Builds 32 bit executable" OFF)
 # Testing
 option(BUILD_TESTS "Build the test suite" ON)
 
+# Export compiler commands when building
+option(BUILD_EXPORT_CC_CMDS "Export the compiler commands when building to use with Sourcetrail" ON)
+
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
         message(FATAL_ERROR "${PROJECT_NAME} requires GCC 4.7 or greater.")
@@ -151,6 +154,16 @@ set(MACHINES_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${NORMAL_CXX_FLAGS}")
 set(MACHINES_C_FLAGS "${CMAKE_C_FLAGS} ${NORMAL_C_FLAGS}")
 set(MACHINES_CXX_FLAGS_RELEASE "${RELEASE_CXX_FLAGS}")
 set(MACHINES_CXX_FLAGS_DEBUG "${DEBUG_CXX_FLAGS}")
+
+# Export the compiler commands when building to use with Sourcetrail
+if(BUILD_EXPORT_CC_CMDS)
+    if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
+        set(CMAKE_EXPORT_COMPILE_COMMANDS
+            ON
+            CACHE BOOL "Enable output of compile commands during generation." FORCE)
+    endif()
+    message(STATUS "Export of compile commands is set to: ${CMAKE_EXPORT_COMPILE_COMMANDS}")
+endif(BUILD_EXPORT_CC_CMDS)
 
 # Asserts can be enabled/disabled regardless of build type
 option(DEV_BUILD "Enable assert()s and other debug checks" ON)
