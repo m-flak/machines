@@ -18,7 +18,8 @@
 #include "utility/linetok.hpp"
 #include "render/device.hpp"
 #include "render/display.hpp"
-#include "ani/smacker.hpp"
+#include "ani/AniSmacker.hpp"
+#include "ani/AniSmackerRegular.hpp"
 #include "device/cd.hpp"
 #include <fstream>
 
@@ -236,8 +237,9 @@ MachGuiCtxHotKeys::MachGuiCtxHotKeys( MachGuiStartupScreens* pStartupScreens )
 	{
 //		HWND targetWindow = RenDevice::current()->display()->window();
 //	 	AniSmacker* pSmackerAnimation = _NEW( AniSmacker( hotkeySmackerFile, targetWindow, 430 + pStartupScreens_->xMenuOffset(), 199 + pStartupScreens_->yMenuOffset() ) );
-	 	AniSmacker* pSmackerAnimation = _NEW( AniSmacker( hotkeySmackerFile, 430 + pStartupScreens_->xMenuOffset(), 199 + pStartupScreens_->yMenuOffset() ) );
-		pStartupScreens_->addSmackerAnimation( pSmackerAnimation );
+//	 	AniSmacker* pSmackerAnimation = _NEW( AniSmacker( hotkeySmackerFile, 430 + pStartupScreens_->xMenuOffset(), 199 + pStartupScreens_->yMenuOffset() ) );
+        AniSmacker* pSmackerAnimation = new AniSmackerRegular(hotkeySmackerFile, 430 + pStartupScreens_->xMenuOffset(), 199 + pStartupScreens_->yMenuOffset());
+        pStartupScreens_->addSmackerAnimation( pSmackerAnimation );
  	 }
 
    	MachGuiMenuButton* pContinueBtn = _NEW( MachGuiMenuButton( pStartupScreens, Gui::Box( 351, 420, 553, 464 ), IDS_MENUBTN_CONTINUE, MachGuiStartupScreens::EXIT ) );

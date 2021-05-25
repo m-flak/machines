@@ -37,6 +37,8 @@ set(TESTING_THESE_GUYS
 )
 
 #### Test Cases
+#~:ani
+append_test(FrameScalerTests ani/FrameScalerTests.cpp)
 #~:system
 append_test(SysPathNameTests system/SysPathNameTests.cpp)
 

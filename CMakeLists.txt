@@ -196,6 +196,7 @@ find_package(OpenAL REQUIRED)
 find_package(Alure REQUIRED)
 find_package(ENet REQUIRED)
 find_package(Freetype REQUIRED)
+find_package(SWScale REQUIRED)
 
 
 if(NOT DEV_BUILD)
