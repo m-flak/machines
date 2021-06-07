@@ -111,7 +111,7 @@ RenDevice::RenDevice(RenDisplay* display) : pImpl_(new RenIDeviceImpl(display, t
     }
 
     // Create and compile our GLSL programs from the shaders
-    glProgramID_GIU2D_ = loadShaders("2dshading.vxgls", "2dshading.fggls");
+    glProgramID_GIU2D_ = loadShaders("2DShading.vxgls", "2DShading.fggls");
 
     // Initialize VBO
     glGenBuffers(1, &gl2DVertexBufferID_);
@@ -123,7 +123,7 @@ RenDevice::RenDevice(RenDisplay* display) : pImpl_(new RenIDeviceImpl(display, t
     // Initialize uniforms' IDs
     gl2DUniformID_ = glGetUniformLocation(glProgramID_GIU2D_, "uTextureSampler");
 
-    glProgramID_Standard_ = loadShaders("standardshading.vxgls", "standardshading.fggls");
+    glProgramID_Standard_ = loadShaders("StandardShading.vxgls", "StandardShading.fggls");
     // Get a handle for our "MVP" uniform
     glModelMatrixID_ = glGetUniformLocation(glProgramID_Standard_, "uM");
     glViewMatrixID_ = glGetUniformLocation(glProgramID_Standard_, "uV");
@@ -139,7 +139,7 @@ RenDevice::RenDevice(RenDisplay* display) : pImpl_(new RenIDeviceImpl(display, t
     glVertex_modelspaceUVID_ = glGetAttribLocation(glProgramID_Standard_, "vertexUV");
     glTextureSamplerID_ = glGetUniformLocation(glProgramID_Standard_, "uTextureSampler2");
 
-    glProgramID_Billboard_ = loadShaders("billboardshading.vxgls", "2dshading.fggls");
+    glProgramID_Billboard_ = loadShaders("BillboardShading.vxgls", "2DShading.fggls");
     // VBO
     glGenBuffers(1, &glVertexDataBufferBillboardID_);
     glGenBuffers(1, &glElementBufferBillboardID_);
@@ -526,6 +526,12 @@ bool RenDevice::reinitializeDisplayAndCreateGlContext()
     return true;
 }
 
+bool RenDevice::fitToDisplay(RenDisplay *pDisplay)
+{
+    PRE(pDisplay);
+    return reinitializeDisplayAndCreateGlContext();
+}
+
 void RenDevice::createViewport()
 {
     backgroundColour(RenColour::black());
@@ -853,7 +859,9 @@ void RenDevice::commonEndFrame()
     {
         RenSurface surf = backSurface();
         auto const& yellowColour{ RenColour::yellow() };
-        surf.drawText(pImpl_->debugX_, pImpl_->debugY_, concat, yellowColour, RenSurface::FontSizes::Statistics, RenSurface::AvailableFonts::Terminus);
+        // >trusting incremental rebuilds
+        //surf.drawText(pImpl_->debugX_, pImpl_->debugY_, concat, yellowColour, RenSurface::FontSizes::Statistics, RenSurface::AvailableFonts::Terminus);
+        surf.drawText(pImpl_->debugX_, pImpl_->debugY_, concat, yellowColour);
     }
 
     pImpl_->extOut_.clear();
