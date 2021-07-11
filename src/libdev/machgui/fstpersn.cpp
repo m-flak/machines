@@ -45,6 +45,7 @@
 #include "machgui/chatmsgs.hpp"
 #include "machgui/database.hpp"
 #include "machgui/dbscenar.hpp"
+#include "machgui/MachGuiFPCommand.hpp"
 #include "machphys/objdata.hpp"
 #include "machphys/snddata.hpp"
 #include "machphys/machine.hpp"
@@ -194,6 +195,9 @@ public:
 	bool isHitInterferenceOn_;
 	double hitInterferenceEndTime_;
 	int frameNumber_;
+
+    // FP Command
+    MachGuiFPCommand* pCommandWidget;
 };
 
 MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
@@ -224,7 +228,8 @@ MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
 	reverseUpDownMouse_( SysRegistry::instance().queryIntegerValue( "Options\\Reverse BackForward Mouse", "on", SysRegistry::CURRENT_USER ) ),
 	hitInterferenceRandom_( MexBasicRandom::constructSeededFromTime() ),
 	machineNVGOn_( false ),
-	finishedStartupSequence_( false )
+    finishedStartupSequence_( false ),
+    pCommandWidget( nullptr )
 {
 	compassBmp_.enableColourKeying();
 	weaponChargeBmp_.enableColourKeying();
