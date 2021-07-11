@@ -1,0 +1,31 @@
+#pragma once
+
+#include "machlog/squad.hpp"
+
+class MachLog1stPersonActiveSquadron final
+{
+public:
+    // This constructor is for the case when the embodied machine is a squad member.
+    explicit MachLog1stPersonActiveSquadron(MachLogSquadron* initialActiveSquad);
+    // When not a squad member, the player will need to select one in the GUI layer.
+    MachLog1stPersonActiveSquadron();
+    ~MachLog1stPersonActiveSquadron();
+    // MOVEABLE
+    MachLog1stPersonActiveSquadron(MachLog1stPersonActiveSquadron&& other);
+    MachLog1stPersonActiveSquadron& operator=( MachLog1stPersonActiveSquadron&& other);
+    // NOT COPYABLE
+    MachLog1stPersonActiveSquadron(const MachLog1stPersonActiveSquadron&) = delete;
+    MachLog1stPersonActiveSquadron& operator=(const MachLog1stPersonActiveSquadron&) = delete;
+
+    ///////////////////////////////////////////////////
+
+    // Is there an active squad being tracked?
+    bool hasActiveSquadron() const;
+
+    // Set the active squadron "safely" using squad index, 0...9
+    void setActiveSquadron(size_t squadIndex);
+    void clearActiveSquadron();
+
+private:
+    MachLogSquadron* pActiveSquadron_;
+};

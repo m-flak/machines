@@ -24,6 +24,7 @@ class MachPhys1stPersonDriver;
 class MachPhysFirstPersonStateVector;
 class MachActor;
 class MachLog1stPersonHandlerData;
+class MachLog1stPersonActiveSquadron;
 class MachLogWeapon;
 class MachLogCamera;
 
@@ -126,6 +127,9 @@ public:
     MachLogCamera& camera() const;
     //PRE hasCamera()
 
+    // FP COMMAND - Get the active squadron
+    const MachLog1stPersonActiveSquadron& getActiveSquadron() const;
+
     void CLASS_INVARIANT;
 
 protected:
@@ -176,6 +180,9 @@ private:
 
     //Send the current state of this entity round the network
     void xmitStateVector();
+
+    // FP COMMAND - Get the active squadron
+    virtual const MachLog1stPersonActiveSquadron& actuallyGetActiveSquadron() const = 0;
 
     //revoked
     MachLog1stPersonHandler( const MachLog1stPersonHandler& );

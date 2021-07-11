@@ -606,4 +606,9 @@ bool MachLogAimDataFilter::check( const W4dEntity& entity, TreeOption* pOption )
     return doCheck;
 }
 
+const MachLog1stPersonActiveSquadron& MachLog1stPersonHandler::getActiveSquadron() const
+{
+    return actuallyGetActiveSquadron();
+}
+
 /* End P1HANDLR.CPP *************************************************/
