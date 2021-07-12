@@ -23,6 +23,7 @@ protected:
 
 private:
     static GuiBitmap& noSquadronSelected();
+    static GuiBitmap& widgetBody();
 
     MachLog1stPersonHandler* pLogHandler_;
 };

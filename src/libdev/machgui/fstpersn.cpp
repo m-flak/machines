@@ -197,7 +197,7 @@ public:
 	int frameNumber_;
 
     // FP Command
-    MachGuiFPCommand* pCommandWidget;
+    MachGuiFPCommand* pCommandWidget_;
 };
 
 MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
@@ -229,7 +229,7 @@ MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
 	hitInterferenceRandom_( MexBasicRandom::constructSeededFromTime() ),
 	machineNVGOn_( false ),
     finishedStartupSequence_( false ),
-    pCommandWidget( nullptr )
+    pCommandWidget_( nullptr )
 {
 	compassBmp_.enableColourKeying();
 	weaponChargeBmp_.enableColourKeying();
@@ -314,6 +314,12 @@ MachGuiFirstPerson::~MachGuiFirstPerson()
 	CB_DEPIMPL( DevKeyToCommandTranslator*, pKeyTranslator_ );
 	CB_DEPIMPL( MachLog1stPersonHandler*, pLogHandler_ );
 	CB_DEPIMPL( MachGuiPausedImage*, pPausedImage_ );
+    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
+
+    if (pCommandWidget_ != nullptr)
+    {
+        delete pCommandWidget_;
+    }
 
 	_DELETE( pKeyTranslator_ );
 	_DELETE( pLogHandler_ );
@@ -954,6 +960,7 @@ void MachGuiFirstPerson::doBecomeRoot()
 	CB_DEPIMPL( bool, isHitInterferenceOn_ );
 	CB_DEPIMPL( int, frameNumber_ );
 	CB_DEPIMPL( bool, machineNVGOn_ );
+    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
 
 	// Just about to enter machine so initialise the startup sequence
 	finishedStartupSequence_ = false;
@@ -989,7 +996,11 @@ void MachGuiFirstPerson::doBecomeRoot()
 
 		// Create radar
 		GuiBitmap rcmMapBmp = Gui::bitmap("gui/fstpersn/radar/rmmap.bmp");
-		_DELETE( pRadar_ );
+        if (pRadar_ != nullptr)
+        {
+            delete pRadar_;
+        }
+
 		pRadar_ = _NEW( MachGuiRadar( this, Gui::Coord( w-rcmMapBmp.width(), h-borderHeight_-rcmMapBmp.height() ) ) );
 		pRadar_->actor( pActor_ );
 
@@ -1068,6 +1079,13 @@ void MachGuiFirstPerson::doBecomeRoot()
 
 	reverseUpDownKeys_ = SysRegistry::instance().queryIntegerValue( "Options\\Reverse UpDown Keys", "on", SysRegistry::CURRENT_USER );
 	reverseUpDownMouse_ = SysRegistry::instance().queryIntegerValue( "Options\\Reverse BackForward Mouse", "on", SysRegistry::CURRENT_USER );
+
+    // Create FP Command Widget
+    if (pCommandWidget_ == nullptr)
+    {
+        pCommandWidget_ = new MachGuiFPCommand(this, Gui::Coord(21, h-187));
+        pCommandWidget_->logHandler(pLogHandler_);
+    }
 }
 
 //virtual
@@ -1541,12 +1559,14 @@ void MachGuiFirstPerson::exitActor()
 	CB_DEPIMPL( MachLog1stPersonHandler*, pLogHandler_ );
 	CB_DEPIMPL( MachActor*, pActor_ );
 	CB_DEPIMPL( MachGuiRadar*, pRadar_ );
+    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
 
     //Delete the handler
     _DELETE( pLogHandler_ );
     pLogHandler_ = NULL;
 
 	pRadar_->resetLogHandler();
+    pCommandWidget_->resetLogHandler();
 
 	// Put selection box back round actor.
 	if ( pActor_ )
