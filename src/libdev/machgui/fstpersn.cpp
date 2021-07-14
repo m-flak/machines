@@ -30,6 +30,7 @@
 #include "machlog/canattac.hpp"
 #include "machlog/machine.hpp"
 #include "machlog/p1mchndl.hpp"
+#include "machlog/MachLog1stPersonActiveSquad.hpp"
 #include "machlog/plandoms.hpp"
 #include "machlog/planet.hpp"
 #include "machlog/weapon.hpp"
@@ -198,6 +199,7 @@ public:
 
     // FP Command
     MachGuiFPCommand* pCommandWidget_;
+    int64_t commandSquadIndex_;
 };
 
 MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
@@ -229,7 +231,8 @@ MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
 	hitInterferenceRandom_( MexBasicRandom::constructSeededFromTime() ),
 	machineNVGOn_( false ),
     finishedStartupSequence_( false ),
-    pCommandWidget_( nullptr )
+    pCommandWidget_( nullptr ),
+    commandSquadIndex_(-1L)
 {
 	compassBmp_.enableColourKeying();
 	weaponChargeBmp_.enableColourKeying();
@@ -292,6 +295,9 @@ MachGuiFirstPerson::MachGuiFirstPerson( W4dSceneManager* pSceneManager, W4dRoot*
  	pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::RIGHT_ARROW_PAD, TURNHEADRIGHT, DevKeyToCommand::CTRLKEY_PRESSED, DevKeyToCommand::SHIFTKEY_PRESSED ) );
 	pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::LEFT_ARROW_PAD, TURNHEADLEFTFAST, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_PRESSED ) );
  	pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::RIGHT_ARROW_PAD, TURNHEADRIGHTFAST, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_PRESSED ) );
+    // Keyboard commands for first person command
+    pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::HOME, COMMAND_SELECT_NEXT, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ));
+    pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::END, COMMAND_SELECT_PREV, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ));
 
 	pKeyTranslator_->initEventQueue();
 
@@ -420,6 +426,8 @@ void MachGuiFirstPerson::update()
 	CB_DEPIMPL( bool, finishedStartupSequence_ )
 	CB_DEPIMPL( bool, isHitInterferenceOn_ );
 	CB_DEPIMPL( int, frameNumber_ );
+    CB_DEPIMPL( int64_t, commandSquadIndex_);
+    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
 
 	double now = DevTime::instance().time();
 
@@ -465,6 +473,11 @@ void MachGuiFirstPerson::update()
     {
         MachLog1stPersonHandler& logHandler = *pLogHandler_;
 
+        if ( commandSquadIndex_ == -1L and logHandler.getActiveSquadron().hasActiveSquadron() )
+        {
+            commandSquadIndex_ = logHandler.getActiveSquadron().getActiveSquadronId() - 1;
+        }
+
 		if( pActor_ and not ( pActor_->objectType() == MachLog::AGGRESSOR
 							  and pActor_->asAggressor().subType() == MachPhys::NINJA
 							  and pActor_->busy() ) ) // prevents major movement when gorilla is doing its ground punch
@@ -504,6 +517,31 @@ void MachGuiFirstPerson::update()
 	    		logHandler.turnRight();
 	    	}
 		}
+
+        // Cycle squadrons for Command
+        if( commandList_[COMMAND_SELECT_NEXT].on() )
+        {
+            // start over if need be
+            if (++commandSquadIndex_ > 9)
+            {
+                commandSquadIndex_ = 0;
+            }
+
+            const_cast<MachLog1stPersonActiveSquadron&>(logHandler.getActiveSquadron()).setActiveSquadron(commandSquadIndex_);
+            pCommandWidget_->updateSquadIcon();
+
+        }
+        if( commandList_[COMMAND_SELECT_PREV].on() )
+        {
+            // roll back over to end
+            if (--commandSquadIndex_ < 0)
+            {
+                commandSquadIndex_ = 9;
+            }
+
+            const_cast<MachLog1stPersonActiveSquadron&>(logHandler.getActiveSquadron()).setActiveSquadron(commandSquadIndex_);
+            pCommandWidget_->updateSquadIcon();
+        }
 
 		// Turn head...
     	if( commandList_[TURNHEADLEFT].on() and logHandler.canTurnHead() )
@@ -1001,7 +1039,7 @@ void MachGuiFirstPerson::doBecomeRoot()
             delete pRadar_;
         }
 
-		pRadar_ = _NEW( MachGuiRadar( this, Gui::Coord( w-rcmMapBmp.width(), h-borderHeight_-rcmMapBmp.height() ) ) );
+        pRadar_ = _NEW( MachGuiRadar( this, Gui::Coord( w-rcmMapBmp.width(), h-borderHeight_-rcmMapBmp.height() ) ) );
 		pRadar_->actor( pActor_ );
 
 		// Reset resolution changed flag
@@ -1015,6 +1053,12 @@ void MachGuiFirstPerson::doBecomeRoot()
 
 	// Store camera type use in game
 	switchBackToGroundCamera_ = pInGameScreen_->cameras()->isGroundCameraActive();
+
+    // Create FP Command Widget
+    if (pCommandWidget_ == nullptr)
+    {
+        pCommandWidget_ = new MachGuiFPCommand(this, Gui::Coord(21, h-187));
+    }
 
     //Embody the actor
     embodyActor();
@@ -1079,13 +1123,6 @@ void MachGuiFirstPerson::doBecomeRoot()
 
 	reverseUpDownKeys_ = SysRegistry::instance().queryIntegerValue( "Options\\Reverse UpDown Keys", "on", SysRegistry::CURRENT_USER );
 	reverseUpDownMouse_ = SysRegistry::instance().queryIntegerValue( "Options\\Reverse BackForward Mouse", "on", SysRegistry::CURRENT_USER );
-
-    // Create FP Command Widget
-    if (pCommandWidget_ == nullptr)
-    {
-        pCommandWidget_ = new MachGuiFPCommand(this, Gui::Coord(21, h-187));
-        pCommandWidget_->logHandler(pLogHandler_);
-    }
 }
 
 //virtual
@@ -1523,6 +1560,7 @@ void MachGuiFirstPerson::embodyActor()
 	CB_DEPIMPL( MachGuiRadar*, pRadar_ );
 	CB_DEPIMPL( MachInGameScreen*, pInGameScreen_ );
 	CB_DEPIMPL( bool, rightMouseButtonHeadTurningUsed_ );
+    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
 
     PRE( pActor_ != NULL );
     PRE( pLogHandler_ == NULL );
@@ -1537,6 +1575,14 @@ void MachGuiFirstPerson::embodyActor()
     {
         pLogHandler_ = _NEW( MachLog1stPersonMachineHandler( &actor.asMachine(), MachLog1stPersonHandler::LOCAL ) );
 		pRadar_->logHandler( pLogHandler_ );
+        pCommandWidget_->logHandler(pLogHandler_);
+
+        // If the embodied machine has a squadron, it shall be selected. Let's show that.
+        if (pLogHandler_->getActiveSquadron().hasActiveSquadron())
+        {
+            pCommandWidget_->updateSquadIcon();
+        }
+
 		W4dEntity* thisEntity = _STATIC_CAST(W4dEntity*, &(pActor_->asMachine().physMachine()));
 		W4dSoundManager::instance().stop(thisEntity);
 		W4dSoundManager::instance().play(thisEntity, SID_INHEAD, 0, 0);
@@ -1560,13 +1606,19 @@ void MachGuiFirstPerson::exitActor()
 	CB_DEPIMPL( MachActor*, pActor_ );
 	CB_DEPIMPL( MachGuiRadar*, pRadar_ );
     CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
+    CB_DEPIMPL( int64_t, commandSquadIndex_);
 
     //Delete the handler
     _DELETE( pLogHandler_ );
     pLogHandler_ = NULL;
 
+    // RESET RADAR (sorta...)
 	pRadar_->resetLogHandler();
+
+    // RESET COMMAND WIDGET
     pCommandWidget_->resetLogHandler();
+    pCommandWidget_->clearSquadIcon();
+    commandSquadIndex_ = -1L;
 
 	// Put selection box back round actor.
 	if ( pActor_ )

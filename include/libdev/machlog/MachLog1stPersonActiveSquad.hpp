@@ -21,8 +21,14 @@ public:
 
     // Is there an active squad being tracked?
     bool hasActiveSquadron() const;
+    // Squadron Id. YOU MUST SUBTRACT ONE to use as an index.
+    int64_t getActiveSquadronId() const;
+
+    // Who is the commander or strongest machine in the squad?
+    MachLogMachine* const getLeadingMachine() const;
 
     // Set the active squadron "safely" using squad index, 0...9
+    // ... Do nothing if the squad is empty.
     void setActiveSquadron(size_t squadIndex);
     void clearActiveSquadron();
 

@@ -74,7 +74,7 @@ MachLog1stPersonMachineHandler::MachLog1stPersonMachineHandler
 		pData_->pMachine_->squadron( NULL );
 
         // Provide the machine's squadron as the active one for FP Command
-        pData_->activeSquadron_ = MachLog1stPersonActiveSquadron(pData_->pOriginalSquadron_);
+        pData_->activeSquadron_ = MachLog1stPersonActiveSquadron{ pData_->pOriginalSquadron_ };
 	}
 
     //Cancel current operations
