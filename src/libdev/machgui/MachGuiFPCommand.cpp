@@ -12,6 +12,10 @@ MachGuiFPCommand::MachGuiFPCommand( GuiDisplayable* pParent, const Gui::Coord& r
 {
     pLogHandler_ = nullptr;
     pActiveSquadIcon_ = &noSquadronSelected();
+
+    attackCommandState_ = CommandIconState::INVALID;
+    followCommandState_ = CommandIconState::INVALID;
+    moveCommandState_   = CommandIconState::INVALID;
 }
 
 MachGuiFPCommand::~MachGuiFPCommand()
@@ -70,6 +74,15 @@ void MachGuiFPCommand::doDisplay()
 
     GuiPainter::instance().blit( widgetBody(), Gui::Coord( minX, minY ) );
     GuiPainter::instance().blit( *pActiveSquadIcon_, Gui::Coord( minX+41, minY+52 ) );
+
+    // widget.bmp: 130x130
+    // the command icons: 64x24
+    int state = static_cast<int>(moveCommandState_);
+    GuiPainter::instance().blit( moveCommandIcons()[state], Gui::Coord( minX, minY+130 ) );
+    state = static_cast<int>(followCommandState_);
+    GuiPainter::instance().blit( followCommandIcons()[state], Gui::Coord( minX+66, minY+130 ) );
+    state = static_cast<int>(attackCommandState_);
+    GuiPainter::instance().blit( attackCommandIcons()[state], Gui::Coord( minX+130/2-64/2, minY+130+24 ) );
 }
 
 //static
@@ -84,4 +97,43 @@ GuiBitmap& MachGuiFPCommand::widgetBody()
 {
     static GuiBitmap widget = Gui::bitmap( SysPathName("gui/fstpersn/command/widget.bmp" ) );
     return widget;
+}
+
+//static
+GuiBitmap* MachGuiFPCommand::attackCommandIcons()
+{
+    static GuiBitmap attackIcons[NumCommandIconStates] =
+    {
+        /* INVALID   */ Gui::bitmap( SysPathName("gui/fstpersn/command/attack_invalid.bmp") ),
+        /* VALID     */ Gui::bitmap( SysPathName("gui/fstpersn/command/attack_valid.bmp") ),
+        /* ACTIVATED */ Gui::bitmap( SysPathName("gui/fstpersn/command/attack_activate.bmp") )
+    };
+
+    return attackIcons;
+}
+
+//static
+GuiBitmap* MachGuiFPCommand::followCommandIcons()
+{
+    static GuiBitmap followIcons[NumCommandIconStates] =
+    {
+        /* INVALID   */ Gui::bitmap( SysPathName("gui/fstpersn/command/follow_invalid.bmp") ),
+        /* VALID     */ Gui::bitmap( SysPathName("gui/fstpersn/command/follow_valid.bmp") ),
+        /* ACTIVATED */ Gui::bitmap( SysPathName("gui/fstpersn/command/follow_activate.bmp") )
+    };
+
+    return followIcons;
+}
+
+//static
+GuiBitmap* MachGuiFPCommand::moveCommandIcons()
+{
+    static GuiBitmap moveIcons[NumCommandIconStates] =
+    {
+        /* INVALID   */ Gui::bitmap( SysPathName("gui/fstpersn/command/move_invalid.bmp") ),
+        /* VALID     */ Gui::bitmap( SysPathName("gui/fstpersn/command/move_valid.bmp") ),
+        /* ACTIVATED */ Gui::bitmap( SysPathName("gui/fstpersn/command/move_activate.bmp") )
+    };
+
+    return moveIcons;
 }

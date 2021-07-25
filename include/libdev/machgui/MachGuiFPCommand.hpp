@@ -6,6 +6,17 @@
 class MachGuiFPCommand : public GuiDisplayable
 {
 public:
+    enum class CommandIconState : int
+    {
+        INVALID,
+        VALID,
+        ACTIVATED,
+        NUM_STATES
+    };
+    static constexpr int NumCommandIconStates { static_cast<int>(CommandIconState::NUM_STATES) };
+
+    ///////////////////////////////////////////////////
+
     MachGuiFPCommand( GuiDisplayable* pParent, const Gui::Coord& relPos );
     ~MachGuiFPCommand();
     // NON-COPYABLE
@@ -27,6 +38,14 @@ protected:
 private:
     static GuiBitmap& noSquadronSelected();
     static GuiBitmap& widgetBody();
+
+    static GuiBitmap* attackCommandIcons();
+    static GuiBitmap* followCommandIcons();
+    static GuiBitmap* moveCommandIcons();
+
+    CommandIconState attackCommandState_;
+    CommandIconState followCommandState_;
+    CommandIconState moveCommandState_;
 
     GuiBitmap activeSquadIcon_;
 
