@@ -1,6 +1,10 @@
 #pragma once
 
 #include "machlog/squad.hpp"
+#include "machlog/attack.hpp"
+#include "machlog/follow.hpp"
+#include "machlog/move.hpp"
+#include "machlog/MachLog1stPersonOpDispatch.hpp"
 
 class MachLog1stPersonActiveSquadron final
 {
@@ -34,4 +38,8 @@ public:
 
 private:
     MachLogSquadron* pActiveSquadron_;
+
+    MachLog1stPersonOpDispatch<MachLogAttackOperation> attackDispatcher_;
+    MachLog1stPersonOpDispatch<MachLogFollowOperation> followDispatcher_;
+    MachLog1stPersonOpDispatch<MachLogMoveToOperation> moveDispatcher_;
 };

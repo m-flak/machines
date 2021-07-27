@@ -7,6 +7,9 @@
 #include "machlog/administ.hpp"
 
 MachLog1stPersonActiveSquadron::MachLog1stPersonActiveSquadron(MachLogSquadron* initialActiveSquad)
+    : attackDispatcher_(&pActiveSquadron_),
+      followDispatcher_(&pActiveSquadron_),
+      moveDispatcher_(&pActiveSquadron_)
 {
     pActiveSquadron_ = initialActiveSquad;
 }
@@ -23,6 +26,9 @@ MachLog1stPersonActiveSquadron::~MachLog1stPersonActiveSquadron()
 }
 
 MachLog1stPersonActiveSquadron::MachLog1stPersonActiveSquadron(MachLog1stPersonActiveSquadron&& other)
+    : attackDispatcher_(&pActiveSquadron_),
+      followDispatcher_(&pActiveSquadron_),
+      moveDispatcher_(&pActiveSquadron_)
 {
     pActiveSquadron_ = std::move(other.pActiveSquadron_);
 }
