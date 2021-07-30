@@ -852,6 +852,12 @@ void MachGuiFirstPerson::update()
 	                logHandler.fire( pTargetActor_ );
 			}
     	}
+
+        if (commandList_[COMMAND_ORDER_ATTACK].on() and canIssueCommands and viableTarget)
+        {
+            pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
+            logHandler.getActiveSquadron().issueAttackCommand(pTargetActor_);
+        }
 	}
 
 	pNormalCursor_->update();
