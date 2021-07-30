@@ -298,6 +298,10 @@ MachGuiFirstPerson::MachGuiFirstPerson( W4dSceneManager* pSceneManager, W4dRoot*
     // Keyboard commands for first person command
     pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::HOME, COMMAND_SELECT_NEXT, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ));
     pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::END, COMMAND_SELECT_PREV, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ));
+    pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::KEY_DELETE, COMMAND_ORDER_ATTACK, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ) );
+    pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::PAGE_DOWN, COMMAND_ORDER_MOVE, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ) );
+    pKeyTranslator_->addTranslation( DevKeyToCommand( DevKey::INSERT, COMMAND_ORDER_FOLLOW, DevKeyToCommand::CTRLKEY_RELEASED, DevKeyToCommand::SHIFTKEY_RELEASED ) );
+
 
 	pKeyTranslator_->initEventQueue();
 
@@ -543,6 +547,15 @@ void MachGuiFirstPerson::update()
             pCommandWidget_->updateSquadIcon();
         }
 
+        // The command icons should not light up if there's nobody selected. This value will be used more further down...
+        bool canIssueCommands = logHandler.getActiveSquadron().hasActiveSquadron();
+        if (not canIssueCommands)
+        {
+            pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
+            pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::INVALID);
+            pCommandWidget_->setMoveIconState(MachGuiFPCommand::CommandIconState::INVALID);
+        }
+
 		// Turn head...
     	if( commandList_[TURNHEADLEFT].on() and logHandler.canTurnHead() )
     	{
@@ -738,6 +751,12 @@ void MachGuiFirstPerson::update()
 				}
 				pAttackCursor_->isVisible( anglesValid );
 	        	pMissCursor_->isVisible( not anglesValid );
+
+                if (canIssueCommands)
+                {
+                    // Light up Attack Icon
+                    pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::VALID);
+                }
 			}
 			else
 			{
@@ -747,9 +766,16 @@ void MachGuiFirstPerson::update()
 					MachGuiSoundManager::instance().playSound( "gui/sounds/friendon.wav" );
 				}
 
-				// Display miss cursor ( fristd::endly machine )
+                // Display miss cursor ( friendly machine )
 	        	pAttackCursor_->isVisible( false );
 	        	pMissCursor_->isVisible( true );
+
+
+                if (canIssueCommands)
+                {
+                    // Don't light up Attack Icon
+                    pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
+                }
 			}
 		}
 		else
@@ -757,6 +783,12 @@ void MachGuiFirstPerson::update()
 			// Hide attack cursors
 			pAttackCursor_->isVisible( false );
         	pMissCursor_->isVisible( false );
+
+            if (canIssueCommands)
+            {
+                // Don't light up attack icon
+                pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
+            }
 		}
 
 		// Display normal or startup cursor

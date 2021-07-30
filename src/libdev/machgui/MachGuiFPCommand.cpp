@@ -65,6 +65,19 @@ void MachGuiFPCommand::clearSquadIcon()
     pActiveSquadIcon_ = &noSquadronSelected();
 }
 
+void MachGuiFPCommand::setAttackIconState(CommandIconState state)
+{
+    attackCommandState_ = state;
+}
+void MachGuiFPCommand::setFollowIconState(CommandIconState state)
+{
+    followCommandState_ = state;
+}
+void MachGuiFPCommand::setMoveIconState(CommandIconState state)
+{
+    moveCommandState_ = state;
+}
+
 //virtual
 void MachGuiFPCommand::doDisplay()
 {

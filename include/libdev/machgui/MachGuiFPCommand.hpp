@@ -32,6 +32,11 @@ public:
     void updateSquadIcon();
     void clearSquadIcon();
 
+    // Change command icon states
+    void setAttackIconState(CommandIconState state);
+    void setFollowIconState(CommandIconState state);
+    void setMoveIconState(CommandIconState state);
+
 protected:
     virtual void doDisplay() override;
 

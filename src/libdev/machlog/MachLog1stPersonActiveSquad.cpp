@@ -75,6 +75,16 @@ MachLogMachine* const MachLog1stPersonActiveSquadron::getLeadingMachine() const
     return pActiveSquadron_->getStrongestMachine();
 }
 
+void MachLog1stPersonActiveSquadron::issueAttackCommand(MachActor* target) const
+{
+    if (not hasActiveSquadron() or target == nullptr)
+    {
+        return;
+    }
+
+    attackDispatcher_.dispatchOperation(target, MachLogAttackOperation::TERMINATE_ON_CHANGE);
+}
+
 void MachLog1stPersonActiveSquadron::setActiveSquadron(size_t squadIndex)
 {
     MachLogRaces& races = MachLogRaces::instance();

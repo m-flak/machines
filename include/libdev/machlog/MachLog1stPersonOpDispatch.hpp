@@ -17,7 +17,7 @@ public:
 
     // YO!: The first parameter of an operation, pActor, is handled internally.
     template<typename ...OperationArgs>
-    void dispatchOperation(OperationArgs... args)
+    void dispatchOperation(OperationArgs... args) const
     {
         MachLogSquadron* dispatchTo = *ppSquad_;
 
