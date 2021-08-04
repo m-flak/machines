@@ -2,9 +2,8 @@
 
 #include "system/pathname.hpp"
 #include "gui/painter.hpp"
-#include "machgui/actbmpnm.hpp"
-#include "machlog/canattac.hpp"
 #include "machlog/machine.hpp"
+#include "machgui/gui.hpp"
 #include "machlog/MachLog1stPersonActiveSquad.hpp"
 
 MachGuiFPCommand::MachGuiFPCommand( GuiDisplayable* pParent, const Gui::Coord& relPos )
@@ -44,14 +43,7 @@ void MachGuiFPCommand::updateSquadIcon()
 
     if (squadLeader)
     {
-        // This is needed for the bitmap name function. )^:?
-        MachPhys::WeaponCombo wc = MachPhys::N_WEAPON_COMBOS;
-        if ( squadLeader->objectIsCanAttack() )
-        {
-            wc = squadLeader->asCanAttack().weaponCombo();
-        }
-
-        activeSquadIcon_ = Gui::bitmap( MachActorBitmaps::name( squadLeader->objectType(), squadLeader->subType(), squadLeader->asMachine().hwLevel(), wc, squadLeader->race(), true ) );
+        activeSquadIcon_  = MachGui::createIconForMachine(squadLeader, true);
         pActiveSquadIcon_ = &activeSquadIcon_;
         return;
     }

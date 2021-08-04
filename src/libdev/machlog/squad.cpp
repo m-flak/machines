@@ -457,6 +457,11 @@ MachLogMachine* MachLogSquadron::getStrongestMachine()
                 {
                     continue;
                 }
+                // Initially assign the first machine, so that all-civvie squads don't cause null pointer woes.
+                if (strongestMachine == nullptr)
+                {
+                    strongestMachine = machine;
+                }
 
                 myStrength = machine->militaryStrength();
                 if (std::max(myStrength, bestStrength) > bestStrength)
@@ -469,6 +474,7 @@ MachLogMachine* MachLogSquadron::getStrongestMachine()
     }
 
     // This bool serves this function
+    // ...so that we perform the above iteration sparingly
     squadronHasChanged_ = false;
 
     return strongestMachine;
