@@ -718,145 +718,166 @@ void MachGuiFirstPerson::update()
 	    logHandler.update();
 
         //Check the current aim
-        pTargetActor_ = NULL;
-        MachPhys::StrikeType strikeType = logHandler.aimData( &targetPoint_, &pTargetActor_ );
+        MachLog1stPersonTargetInfo targetingInfo;
+        logHandler.acquireTargetingInfo(targetingInfo);
 
-        // Work out which cursor should be visible in the middle of the screen
-        bool viableTarget = strikeType == MachPhys::ON_OBJECT;
+        // This guy is used for the health indicator stuff elsewhere in this file. Will either be someone you can shoot at or NULL
+        pTargetActor_ = targetingInfo.shootingTarget;
 
-		// Is it really a viable target, it might be an Ore Holograph or Debris
-		if ( viableTarget )
-		{
-			if ( pTargetActor_->objectIsOreHolograph() or
-				pTargetActor_->objectIsDebris() )
-			{
-				viableTarget = false;
-				pTargetActor_ = NULL;
-			}
-		}
+        bool viableTarget = targetingInfo.strikeType == MachPhys::ON_OBJECT;
+        bool viableShootingTarget = (targetingInfo.shootingTarget != nullptr) and viableTarget;
+        bool viableCommandTarget = (targetingInfo.getCommandTarget() != nullptr) and viableTarget;
 
-		// Are we targeting a machine?
-		if ( viableTarget )
-		{
-			// Enemy machine?
-			if ( pTargetActor_->race() != pActor_->race() )
-			{
-				bool anglesValid = logHandler.targetAnglesValid();
+        // Don't allow the target of ore holos or debris!
+        if (viableShootingTarget)
+        {
+            if ( targetingInfo.shootingTarget->objectIsOreHolograph() or
+                 targetingInfo.shootingTarget->objectIsDebris() )
+            {
+                viableTarget = false;
+            }
+        }
+        else if (viableCommandTarget)
+        {
+            if ( targetingInfo.getCommandTarget()->objectIsOreHolograph() or
+                 targetingInfo.getCommandTarget()->objectIsDebris() )
+            {
+                viableTarget = false;
+            }
+        }
 
-				// Display attack cursor or miss cursor
-				if ( not pAttackCursor_->isVisible() and anglesValid )
-				{
-					// Attack cursor has just come on line. play sound
-					MachGuiSoundManager::instance().playSound( "gui/sounds/attackon.wav" );
-				}
-				pAttackCursor_->isVisible( anglesValid );
-	        	pMissCursor_->isVisible( not anglesValid );
+        // FOR SHOOTING: Are we targeting a machine?
+        if ( viableShootingTarget and viableTarget )
+        {
+            // Enemy machine?
+            if ( targetingInfo.shootingTarget->race() != pActor_->race() )
+            {
+                bool anglesValid = logHandler.targetAnglesValid();
 
-                if (canIssueCommands)
+                // Display attack cursor or miss cursor
+                if ( not pAttackCursor_->isVisible() and anglesValid )
                 {
-                    // Light up Attack Icon
-                    pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::VALID);
+                    // Attack cursor has just come on line. play sound
+                    MachGuiSoundManager::instance().playSound( "gui/sounds/attackon.wav" );
                 }
-			}
-			else
-			{
-				if ( not pMissCursor_->isVisible() )
-				{
-					// Attack cursor has just come on line. play sound
-					MachGuiSoundManager::instance().playSound( "gui/sounds/friendon.wav" );
-				}
+                pAttackCursor_->isVisible( anglesValid );
+                pMissCursor_->isVisible( not anglesValid );
+            }
+            else
+            {
+                if ( not pMissCursor_->isVisible() )
+                {
+                    // Attack cursor has just come on line. play sound
+                    MachGuiSoundManager::instance().playSound( "gui/sounds/friendon.wav" );
+                }
 
                 // Display miss cursor ( friendly machine )
-	        	pAttackCursor_->isVisible( false );
-	        	pMissCursor_->isVisible( true );
+                pAttackCursor_->isVisible( false );
+                pMissCursor_->isVisible( true );
+            }
+        }
+        else
+        {
+            // Hide attack cursors
+            pAttackCursor_->isVisible( false );
+            pMissCursor_->isVisible( false );
+        }
 
-
-                if (canIssueCommands)
-                {
-                    // Don't light up Attack Icon
-                    pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
-                }
-			}
-		}
-		else
-		{
-			// Hide attack cursors
-			pAttackCursor_->isVisible( false );
-        	pMissCursor_->isVisible( false );
-
+        // FOR COMMAND: Are we targeting a machine?
+        if ( canIssueCommands and viableCommandTarget and viableTarget )
+        {
+            // Enemy machine?
+            if ( targetingInfo.getCommandTarget()->race() != pActor_->race() )
+            {
+                // Light up Attack Icon
+                pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::VALID);
+            }
+            else
+            {
+                // He's a friend bruv!
+                // Don't light up Attack Icon
+                pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
+            }
+        }
+        else
+        {
             if (canIssueCommands)
             {
                 // Don't light up attack icon
                 pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
             }
-		}
+        }
 
-		// Display normal or startup cursor
- 		if ( pStartCursor_->cellIndex() == pStartCursor_->numCells() - 1 )
-		{
-			pNormalCursor_->isVisible( not viableTarget );
-			pStartCursor_->isVisible( false );
-		}
-		else
-		{
-			pNormalCursor_->isVisible( false );
-			pStartCursor_->isVisible( not viableTarget );
+        // Display normal or startup cursor
+        if ( pStartCursor_->cellIndex() == pStartCursor_->numCells() - 1 )
+        {
+            pNormalCursor_->isVisible( not viableTarget or not viableShootingTarget );
+            pStartCursor_->isVisible( false );
+        }
+        else
+        {
+            pNormalCursor_->isVisible( false );
+            pStartCursor_->isVisible( not viableTarget );
 
-			// End startup cursor animation if there is a valid target
-			if ( viableTarget )
-			{
-				pStartCursor_->jumpToCell( pStartCursor_->numCells() - 1 );
-			}
-		}
+            // End startup cursor animation if there is a valid target
+            if ( viableTarget )
+            {
+                pStartCursor_->jumpToCell( pStartCursor_->numCells() - 1 );
+            }
+        }
 
         //Fire enabled weapons if requested
-    	if( commandList_[FIRE].on() or DevMouse::instance().leftButton() )
-    	{
-			bool canFire = false;
-			// Check that at least one weapon can fire
-			for ( int weaponIndex = 0; weaponIndex < logHandler.nWeapons() and not canFire; ++weaponIndex )
-			{
-				if ( not pTargetActor_ and logHandler.weaponCanOnlyFireAtActor( weaponIndex ) )
-				{
-					// canFire remains as false
-				}
-				else
-				{
-					if ( logHandler.weapon( weaponIndex ).percentageRecharge() >= 100 and
-						 logHandler.isWeaponEnabled( weaponIndex ) )
-					{
-						// We've found a weapon that can fire
-						canFire = true;
-					}
-				}
-			}
+        if( commandList_[FIRE].on() or DevMouse::instance().leftButton() )
+        {
+            bool canFire = false;
+            // Check that at least one weapon can fire
+            for ( uint weaponIndex = 0; weaponIndex < logHandler.nWeapons() and not canFire; ++weaponIndex )
+            {
+                if ( not targetingInfo.shootingTarget and logHandler.weaponCanOnlyFireAtActor( weaponIndex ) )
+                {
+                    // canFire remains as false
+                }
+                else
+                {
+                    if ( logHandler.weapon( weaponIndex ).percentageRecharge() >= 100 and
+                         logHandler.isWeaponEnabled( weaponIndex ) )
+                    {
+                        // We've found a weapon that can fire
+                        canFire = true;
+                    }
+                }
+            }
 
-			if ( not canFire )
-			{
-				// timeWeaponsFired_ stops sound from being triggered over and over
-				if ( now - timeWeaponsFired_ > 0.8 )
-				{
-					MachGuiSoundManager::instance().playSound( "gui/sounds/nowefire.wav" );
-					timeWeaponsFired_ = now;
-				}
-			}
-			else
-			{
-				timeWeaponsFired_ = now;
+            if ( not canFire )
+            {
+                // timeWeaponsFired_ stops sound from being triggered over and over
+                if ( now - timeWeaponsFired_ > 0.8 )
+                {
+                    MachGuiSoundManager::instance().playSound( "gui/sounds/nowefire.wav" );
+                    timeWeaponsFired_ = now;
+                }
+            }
+            else
+            {
+                timeWeaponsFired_ = now;
 
-	            //Fire the weapons that can fire at points
-	            logHandler.fire( targetPoint_ );
+                //Fire the weapons that can fire at points
+                logHandler.fire( targetingInfo.shootingPoint );
 
-	            //Fire the weapons that can only fire at actors, if we have one
-	            if( pTargetActor_ )
-	                logHandler.fire( pTargetActor_ );
-			}
-    	}
+                //Fire the weapons that can only fire at actors, if we have one
+                if( targetingInfo.shootingTarget )
+                    logHandler.fire( targetingInfo.shootingTarget );
+            }
+        }
 
         if (commandList_[COMMAND_ORDER_ATTACK].on() and canIssueCommands and viableTarget)
         {
-            pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
-            logHandler.getActiveSquadron().issueAttackCommand(pTargetActor_);
+            MachActor* pTarget = targetingInfo.getCommandTarget();
+            if (pTarget)
+            {
+                pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
+                logHandler.getActiveSquadron().issueAttackCommand(pTarget);
+            }
         }
 	}
 

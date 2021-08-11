@@ -328,6 +328,85 @@ MachPhys::StrikeType MachLog1stPersonHandler::aimData( MexPoint3d* pTargetPoint,
     return result;
 }
 
+void MachLog1stPersonHandler::acquireTargetingInfo(TargetingInfo& targetInfo) const
+{
+    bool hadNearer = false;
+    bool hadFarther = false;
+
+    // If we have the nearer hit entity, the one in weapon's range, we will not have the farther one
+    if ( pData_->pPhysDriver_->hasHitEntity() )
+    {
+        W4dEntity& hitEntity = pData_->pPhysDriver_->hitEntity();
+
+        UtlId entityId = hitEntity.id();
+
+        ASSERT_INFO( entityId );
+        ASSERT( entityId < 2001, "That entityId isn't in the permissible range." );
+
+        if( entityId != 0  and  MachLogRaces::instance().actorExists( entityId ) )
+        {
+            MachActor* pTargetActor = &MachLogRaces::instance().actor( entityId );
+            // boost alertness of actor being targetted if it's a canattack of a different race to me
+            MachActor& targetActor = *pTargetActor;
+            if( targetActor.objectIsCanAttack() and targetActor.race() != pData_->pActor_->race() )
+            {
+                targetActor.asCanAttack().setMinimumAlertness( 125 );
+            }
+
+            // WEAPONS RANGE TARGET
+            targetInfo.shootingTarget = pTargetActor;
+            targetInfo.strikeType = MachPhys::ON_OBJECT;
+        }
+        else
+        {
+            targetInfo.strikeType = MachPhys::ON_TERRAIN;
+        }
+
+        // Set the near point
+        hadNearer = true;
+    }
+    else if ( pData_->pPhysDriver_->hasFarCmdHitEntity() )
+    {
+        W4dEntity& hitEntity = pData_->pPhysDriver_->farCmdHitEntity();
+
+        UtlId entityId = hitEntity.id();
+
+        ASSERT_INFO( entityId );
+        ASSERT( entityId < 2001, "That entityId isn't in the permissible range." );
+
+        if( entityId != 0  and  MachLogRaces::instance().actorExists( entityId ) )
+        {
+            MachActor* pTargetActor = &MachLogRaces::instance().actor( entityId );
+            // boost alertness of actor being targetted if it's a canattack of a different race to me
+            MachActor& targetActor = *pTargetActor;
+            if( targetActor.objectIsCanAttack() and targetActor.race() != pData_->pActor_->race() )
+            {
+                targetActor.asCanAttack().setMinimumAlertness( 125 );
+            }
+
+            // FAR AWAY COMMAND ONLY TARGET
+            targetInfo.commandTarget = pTargetActor;
+            targetInfo.strikeType = MachPhys::ON_OBJECT;
+        }
+        else
+        {
+            targetInfo.strikeType = MachPhys::ON_TERRAIN;
+        }
+
+        // Set the far point
+        hadFarther = true;
+    }
+
+    if (hadNearer)
+    {
+        targetInfo.shootingPoint = pData_->pPhysDriver_->hitPoint();
+    }
+    else if (hadFarther)
+    {
+        targetInfo.commandPoint = pData_->pPhysDriver_->farCmdHitPoint();
+    }
+}
+
 void MachLog1stPersonHandler::fire( const MexPoint3d& targetPoint )
 {
     //If a network game ensure state transmitted

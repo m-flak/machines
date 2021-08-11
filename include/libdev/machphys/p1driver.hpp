@@ -65,6 +65,7 @@ public:
     //performs per-frame updating
     void update();
 
+    /*** Vanilla FPS data Getters ***/
     //The distance along camera line of sight which is at the nearer of max weapon range
     //or intersecting some entity. Updated every update() call.
     MATHEX_SCALAR hitDistance() const;
@@ -76,6 +77,12 @@ public:
     bool hasHitEntity() const;
     W4dEntity& hitEntity() const;
     //PRE( hasHitEntity() );
+
+    /*** 'Far' Command FPS data Getters ***/
+    MATHEX_SCALAR farCmdHitDistance() const;
+    const MexPoint3d& farCmdHitPoint() const;
+    bool hasFarCmdHitEntity() const;
+    W4dEntity& farCmdHitEntity() const;
 
     //Sets the machine moving forwards
     void moveForwards();

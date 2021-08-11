@@ -15,6 +15,7 @@
 #include "base/base.hpp"
 #include "mathex/mathex.hpp"
 #include "machphys/machphys.hpp"
+#include "machlog/MachLog1stPersonTargetInfo.hpp"
 
 class MexTransform3d;
 class MexPoint3d;
@@ -104,6 +105,9 @@ public:
     //pTargetPoint returns the location of line-of-sight impact or end-of-range location.
     //pTargetActor returns the actor that would be hit.
     MachPhys::StrikeType aimData( MexPoint3d* pTargetPoint, MachActor** ppTargetActor ) const;
+
+    using TargetingInfo = MachLog1stPersonTargetInfo;
+    void acquireTargetingInfo(TargetingInfo& targetInfo) const;
 
     //Fire each enabled weapon at targetPoint, unless requires an actor
     void fire( const MexPoint3d& targetPoint );

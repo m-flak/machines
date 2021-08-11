@@ -286,6 +286,7 @@ void MachPhys1stPersonDriver::aimData()
     // For far away commands: Find the 'sweet spot' between the machine's sensor range & clip distance.
     MATHEX_SCALAR farCommandDistance = std::abs( camera.yonClipDistance() - scannerRange_ );
     farCommandDistance *= 0.25;
+    farCommandDistance += scannerRange_;
 
     //Construct a 3d line along the line of sight, given current maximum weapon range.
     MATHEX_SCALAR lineLength = maxWeaponRange();
@@ -352,6 +353,27 @@ W4dEntity& MachPhys1stPersonDriver::hitEntity() const
 const MexPoint3d& MachPhys1stPersonDriver::hitPoint() const
 {
     return hitPoint_;
+}
+
+MATHEX_SCALAR MachPhys1stPersonDriver::farCmdHitDistance() const
+{
+    return farCmdHitDistance_;
+}
+
+const MexPoint3d& MachPhys1stPersonDriver::farCmdHitPoint() const
+{
+    return farCmdHitPoint_;
+}
+
+bool MachPhys1stPersonDriver::hasFarCmdHitEntity() const
+{
+    return pFarCmdHitEntity_ != nullptr;
+}
+
+W4dEntity& MachPhys1stPersonDriver::farCmdHitEntity() const
+{
+    PRE( hasFarCmdHitEntity() );
+    return *pFarCmdHitEntity_;
 }
 
 void MachPhys1stPersonDriver::setTrackEntityPosition()
