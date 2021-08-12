@@ -292,42 +292,6 @@ MATHEX_SCALAR MachLog1stPersonHandler::maxWeaponRange() const
     return pData_->maxWeaponRange_;
 }
 
-MachPhys::StrikeType MachLog1stPersonHandler::aimData( MexPoint3d* pTargetPoint, MachActor** ppTargetActor ) const
-{
-    MachPhys::StrikeType result = MachPhys::IN_AIR;
-    *ppTargetActor = NULL;
-
-    //Use the physical driver's cached entity
-    if( pData_->pPhysDriver_->hasHitEntity() )
-    {
-        W4dEntity& hitEntity = pData_->pPhysDriver_->hitEntity();
-
-        UtlId entityId = hitEntity.id();
-
-        ASSERT_INFO( entityId );
-        ASSERT( entityId < 2001, "That entityId isn't in the permissible range." ); 
-
-        if( entityId != 0  and  MachLogRaces::instance().actorExists( entityId ) )
-        {
-            *ppTargetActor = &MachLogRaces::instance().actor( entityId );
-            result = MachPhys::ON_OBJECT;
-
-			// boost alertness of actor being targetted if it's a canattack of a different race to me
-			MachActor& targetActor = **ppTargetActor;
-			if( targetActor.objectIsCanAttack() and targetActor.race() != pData_->pActor_->race() )
-				targetActor.asCanAttack().setMinimumAlertness( 125 );
-
-        }
-        else
-            result = MachPhys::ON_TERRAIN;
-    }
-
-    //Get the hit point coords
-    *pTargetPoint = pData_->pPhysDriver_->hitPoint();
-
-    return result;
-}
-
 void MachLog1stPersonHandler::acquireTargetingInfo(TargetingInfo& targetInfo) const
 {
     bool hadNearer = false;

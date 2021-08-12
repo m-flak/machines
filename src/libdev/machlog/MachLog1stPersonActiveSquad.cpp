@@ -5,6 +5,8 @@
 #include "machlog/cntrl_pc.hpp"
 #include "machlog/races.hpp"
 #include "machlog/administ.hpp"
+#include "machphys/genedata.hpp"
+#include "machphys/mphydata.hpp"
 
 MachLog1stPersonActiveSquadron::MachLog1stPersonActiveSquadron(MachLogSquadron* initialActiveSquad)
     : attackDispatcher_(&pActiveSquadron_),
@@ -85,6 +87,19 @@ void MachLog1stPersonActiveSquadron::issueAttackCommand(MachActor* target) const
     attackDispatcher_.dispatchOperation(target, MachLogAttackOperation::TERMINATE_ON_CHANGE);
 }
 
+void MachLog1stPersonActiveSquadron::issueFollowCommand(MachActor* followTarget) const
+{
+    if (not hasActiveSquadron() or followTarget == nullptr)
+    {
+        return;
+    }
+
+    if (followTarget->objectIsMachine())
+    {
+        followDispatcher_.dispatchOperation(static_cast<MachLogMachine*>(followTarget), MexPoint2d( 0, 0 ), getPathfindingPriority());
+    }
+}
+
 void MachLog1stPersonActiveSquadron::setActiveSquadron(size_t squadIndex)
 {
     MachLogRaces& races = MachLogRaces::instance();
@@ -101,4 +116,10 @@ void MachLog1stPersonActiveSquadron::setActiveSquadron(size_t squadIndex)
 void MachLog1stPersonActiveSquadron::clearActiveSquadron()
 {
     pActiveSquadron_ = nullptr;
+}
+
+//static
+inline PhysPathFindingPriority MachLog1stPersonActiveSquadron::getPathfindingPriority()
+{
+    return Phys::defaultPathFindingPriority() + MachPhysData::instance().generalData().pcPathFindingPriority();
 }

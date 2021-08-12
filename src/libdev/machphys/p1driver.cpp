@@ -330,7 +330,7 @@ void MachPhys1stPersonDriver::aimData()
                                                      &pFarCmdHitEntity_, &farCmdHitDistance_, pImpl_->pAimDataFilter_ );
 
         //Update the FAR hit point
-        hitPoint_ = lineOfSight.pointAtDistance( farCmdHitDistance_ );
+        farCmdHitPoint_ = lineOfSight.pointAtDistance( farCmdHitDistance_ );
     }
 }
 

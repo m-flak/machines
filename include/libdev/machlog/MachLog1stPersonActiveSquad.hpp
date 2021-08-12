@@ -32,6 +32,7 @@ public:
     MachLogMachine* const getLeadingMachine() const;
 
     void issueAttackCommand(MachActor* target) const;
+    void issueFollowCommand(MachActor* followTarget) const;
 
     // Set the active squadron "safely" using squad index, 0...9
     // ... Do nothing if the squad is empty.
@@ -44,4 +45,7 @@ private:
     MachLog1stPersonOpDispatch<MachLogAttackOperation> attackDispatcher_;
     MachLog1stPersonOpDispatch<MachLogFollowOperation> followDispatcher_;
     MachLog1stPersonOpDispatch<MachLogMoveToOperation> moveDispatcher_;
+
+    // helper for pathfinding priority to use when dispatching follow/move commands
+    static PhysPathFindingPriority getPathfindingPriority();
 };

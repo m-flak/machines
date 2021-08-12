@@ -101,11 +101,10 @@ public:
     //PRE( index < nWeapons() );
 
     //returns info about what is in the line of sight, within maximum enabled weapon range.
-    //Result indicates whether hits terrain, actor or nothing in range.
-    //pTargetPoint returns the location of line-of-sight impact or end-of-range location.
-    //pTargetActor returns the actor that would be hit.
-    MachPhys::StrikeType aimData( MexPoint3d* pTargetPoint, MachActor** ppTargetActor ) const;
-
+    //`targetInfo.strikeType` indicates whether hits terrain, actor or nothing in range.
+    //`targetInfo.shootingPoint` returns the location of line-of-sight impact or end-of-range location FOR WEAPONS.
+    //`targetInfo.shootingTarget` returns the actor that would be hit BY WEAPONS.
+    // !! USE THE GETTERS IN TargetingInfo TO GET THE CORRECT DATA FOR COMMANDS !!
     using TargetingInfo = MachLog1stPersonTargetInfo;
     void acquireTargetingInfo(TargetingInfo& targetInfo) const;
 
