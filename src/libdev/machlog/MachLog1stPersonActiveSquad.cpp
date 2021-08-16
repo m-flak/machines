@@ -96,6 +96,7 @@ void MachLog1stPersonActiveSquadron::issueFollowCommand(MachActor* followTarget)
 
     if (followTarget->objectIsMachine())
     {
+        followDispatcher_.setSkipThisMachine(static_cast<MachLogMachine*>(followTarget));
         followDispatcher_.dispatchOperation(static_cast<MachLogMachine*>(followTarget), MexPoint2d( 0, 0 ), getPathfindingPriority());
     }
 }

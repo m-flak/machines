@@ -12,6 +12,7 @@ public:
     explicit MachLog1stPersonOpDispatch(MachLogSquadron** ppSquad)
     {
         ppSquad_ = ppSquad;
+        pSkipThisMachine_ = nullptr;
     }
     ~MachLog1stPersonOpDispatch() {}
 
@@ -33,11 +34,27 @@ public:
         // The Player-controlled machine will not be in this list. It is removed while in 1st person.
         for (auto machine : dispatchTo->machines())
         {
+            if (pSkipThisMachine_ != nullptr)
+            {
+                if (machine == pSkipThisMachine_)
+                {
+                    continue;
+                }
+            }
+
             // DON'T PANIC! MachLogStrategy is responsible for Operation disposal.
             machine->strategy().newOperation(new Operation(machine, args...));
         }
     }
 
+    // Set a machine (if any) to skip when dispatching the op to the squad
+    // ...For example, we don't want to tell a machine to follow itself.
+    void setSkipThisMachine(MachLogMachine* skipMe) const
+    {
+        pSkipThisMachine_ = skipMe;
+    }
+
 private:
     MachLogSquadron** ppSquad_;
+    mutable MachLogMachine* pSkipThisMachine_;
 };

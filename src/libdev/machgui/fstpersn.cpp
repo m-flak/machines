@@ -791,12 +791,18 @@ void MachGuiFirstPerson::update()
             {
                 // Light up Attack Icon
                 pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::VALID);
+
+                // Dim the Follow Icon
+                pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::INVALID);
             }
             else
             {
                 // He's a friend bruv!
                 // Don't light up Attack Icon
                 pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
+
+                // Light up Follow Icon (FOLLOW FRIENDLY)
+                pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::VALID);
             }
         }
         else
@@ -805,10 +811,13 @@ void MachGuiFirstPerson::update()
             {
                 // Don't light up attack icon
                 pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::INVALID);
+
+                // Light up Follow Icon (FOLLOW SELF)
+                pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::VALID);
             }
         }
 
-        // Display normal or startup cursor
+        // Display normal or startup cursor - This is the CROSSHAIRS btw
         if ( pStartCursor_->cellIndex() == pStartCursor_->numCells() - 1 )
         {
             pNormalCursor_->isVisible( not viableTarget or not viableShootingTarget );
@@ -877,6 +886,24 @@ void MachGuiFirstPerson::update()
             {
                 pCommandWidget_->setAttackIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
                 logHandler.getActiveSquadron().issueAttackCommand(pTarget);
+            }
+        }
+
+        if (commandList_[COMMAND_ORDER_FOLLOW].on() and canIssueCommands)
+        {
+            if (not viableTarget) // FOLLOW SELF
+            {
+                pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
+                logHandler.getActiveSquadron().issueFollowCommand(pActor_);
+            }
+            else                  // FOLLOW FRIENDLY
+            {
+                MachActor* pTarget = targetingInfo.getCommandTarget();
+                if (pTarget and pTarget->race() == pActor_->race())
+                {
+                    pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
+                    logHandler.getActiveSquadron().issueFollowCommand(pTarget);
+                }
             }
         }
 	}
