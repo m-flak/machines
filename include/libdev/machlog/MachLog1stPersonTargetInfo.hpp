@@ -32,6 +32,18 @@ struct MachLog1stPersonTargetInfo
         return nullptr;
     }
 
+    // There is still a possibility (is there?) that this point could be (0,0,0) so you should check for that
+    const MexPoint3d& getCommandPoint() const
+    {
+        // Prefer command point
+        if (not commandPoint.isZeroPoint())
+        {
+            return commandPoint;
+        }
+
+        return shootingPoint;
+    }
+
     //  ON_OBJECT  - Hits machine, building, ILF, etc
     //  ON_TERRAIN - Hits ground
     //  IN_AIR     - hasn't hit anything, but run out of range

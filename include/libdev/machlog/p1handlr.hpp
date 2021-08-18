@@ -108,6 +108,9 @@ public:
     using TargetingInfo = MachLog1stPersonTargetInfo;
     void acquireTargetingInfo(TargetingInfo& targetInfo) const;
 
+    //Are we pointing towards the ground for a "move to" command?
+    bool isPointingTowardsGround() const;
+
     //Fire each enabled weapon at targetPoint, unless requires an actor
     void fire( const MexPoint3d& targetPoint );
 

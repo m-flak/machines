@@ -311,8 +311,8 @@ void MachPhys1stPersonDriver::aimData()
     //Update the NEAR hit point
     hitPoint_ = lineOfSight.pointAtDistance( hitDistance_ );
 
-    //No entity in weap range? Look outside of weapon range for a far away entity as a command target
     pFarCmdHitEntity_ = nullptr;
+    //No entity in weap range? Look outside of weapon range for a far away entity as a command target
     if (pHitEntity_ == nullptr)
     {
         farPoint = MexPoint3d{ farCommandDistance, 0.0, 0.0 };

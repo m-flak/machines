@@ -727,6 +727,7 @@ void MachGuiFirstPerson::update()
         bool viableTarget = targetingInfo.strikeType == MachPhys::ON_OBJECT;
         bool viableShootingTarget = (targetingInfo.shootingTarget != nullptr) and viableTarget;
         bool viableCommandTarget = (targetingInfo.getCommandTarget() != nullptr) and viableTarget;
+        bool viableMoveToTarget = logHandler.isPointingTowardsGround() and targetingInfo.strikeType == MachPhys::ON_TERRAIN;
 
         // Don't allow the target of ore holos or debris!
         if (viableShootingTarget)
@@ -814,6 +815,16 @@ void MachGuiFirstPerson::update()
 
                 // Light up Follow Icon (FOLLOW SELF)
                 pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::VALID);
+
+                // Only light up Move Icon when pointing at navigable ground
+                if (viableMoveToTarget)
+                {
+                    pCommandWidget_->setMoveIconState(MachGuiFPCommand::CommandIconState::VALID);
+                }
+                else
+                {
+                    pCommandWidget_->setMoveIconState(MachGuiFPCommand::CommandIconState::INVALID);
+                }
             }
         }
 
@@ -905,6 +916,12 @@ void MachGuiFirstPerson::update()
                     logHandler.getActiveSquadron().issueFollowCommand(pTarget);
                 }
             }
+        }
+
+        if (commandList_[COMMAND_ORDER_MOVE].on() and canIssueCommands and viableMoveToTarget)
+        {
+            // TODO: Implement Move Command!! 8)
+            std::cerr << "MAKE THE MAGIC HAPPEN HERE: " << targetingInfo.getCommandPoint() << std::endl;
         }
 	}
 

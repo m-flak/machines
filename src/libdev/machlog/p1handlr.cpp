@@ -371,6 +371,22 @@ void MachLog1stPersonHandler::acquireTargetingInfo(TargetingInfo& targetInfo) co
     }
 }
 
+bool MachLog1stPersonHandler::isPointingTowardsGround() const
+{
+    MexTransform3d cameraTransform = camera().globalTransform();
+    auto point100mAway = MexPoint3d{ 100.0, 0.0, 0.0 };
+    cameraTransform.transform(&point100mAway);
+
+    MATHEX_SCALAR cameraZed = cameraTransform.position().z();
+    auto forwardVec = MexVec2{ cameraZed, 0.0 };
+    auto differenceVec = MexVec2{ 1.0, 1.0 };
+
+    MATHEX_SCALAR pointZed = point100mAway.z();
+    differenceVec *= cameraZed - pointZed;
+
+    return forwardVec.dotProduct(differenceVec) >= -1.0;
+}
+
 void MachLog1stPersonHandler::fire( const MexPoint3d& targetPoint )
 {
     //If a network game ensure state transmitted
