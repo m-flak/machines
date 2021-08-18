@@ -111,6 +111,9 @@ public:
     //Are we pointing towards the ground for a "move to" command?
     bool isPointingTowardsGround() const;
 
+    //Validate targeting info for move commands
+    bool isViableMoveToTarget(const TargetingInfo& targetInfo) const;
+
     //Fire each enabled weapon at targetPoint, unless requires an actor
     void fire( const MexPoint3d& targetPoint );
 

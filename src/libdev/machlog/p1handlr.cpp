@@ -15,6 +15,7 @@
 #include "mathex/transf3d.hpp"
 #include "mathex/point2d.hpp"
 #include "phys/phys.hpp"
+#include "phys/cspace2.hpp"
 #include "world4d/entity.hpp"
 #include "world4d/entyfilt.hpp"
 #include "world4d/manager.hpp"
@@ -29,6 +30,7 @@
 #include "machlog/races.hpp"
 #include "machlog/network.hpp"
 #include "machlog/messbrok.hpp"
+#include "machlog/planet.hpp"
 #include "network/netnet.hpp"
 
 class MachLogAimDataFilter;
@@ -385,6 +387,30 @@ bool MachLog1stPersonHandler::isPointingTowardsGround() const
     differenceVec *= cameraZed - pointZed;
 
     return forwardVec.dotProduct(differenceVec) >= -1.0;
+}
+
+bool MachLog1stPersonHandler::isViableMoveToTarget(const TargetingInfo& targetInfo) const
+{
+    bool viableMoveToTarget = targetInfo.strikeType == MachPhys::ON_TERRAIN;
+    if (not viableMoveToTarget or targetInfo.getCommandPoint().isZeroPoint())
+    {
+        return false;
+    }
+
+    const MexPoint2d& point = targetInfo.getCommandPoint();
+    PhysConfigSpace2d::DomainId domainId;
+    if ( MachLogPlanet::instance().configSpace().domain( targetInfo.getCommandPoint(), &domainId ) )
+    {
+        PhysConfigSpace2d::PolygonId nastyPolygonId;
+        // OBSTACLE_ALL appears to be the most `permissive` flag
+        viableMoveToTarget &= MachLogPlanet::instance().configSpace().contains(point, MachLog::OBSTACLE_ALL, &nastyPolygonId, PhysConfigSpace2d::USE_PERMANENT_ONLY);
+    }
+    else
+    {
+        return false;
+    }
+
+    return viableMoveToTarget;
 }
 
 void MachLog1stPersonHandler::fire( const MexPoint3d& targetPoint )

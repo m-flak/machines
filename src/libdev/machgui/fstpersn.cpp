@@ -727,7 +727,7 @@ void MachGuiFirstPerson::update()
         bool viableTarget = targetingInfo.strikeType == MachPhys::ON_OBJECT;
         bool viableShootingTarget = (targetingInfo.shootingTarget != nullptr) and viableTarget;
         bool viableCommandTarget = (targetingInfo.getCommandTarget() != nullptr) and viableTarget;
-        bool viableMoveToTarget = logHandler.isPointingTowardsGround() and targetingInfo.strikeType == MachPhys::ON_TERRAIN;
+        bool viableMoveToTarget = logHandler.isPointingTowardsGround() and logHandler.isViableMoveToTarget(targetingInfo);
 
         // Don't allow the target of ore holos or debris!
         if (viableShootingTarget)
