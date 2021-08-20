@@ -33,6 +33,7 @@ public:
 
     void issueAttackCommand(MachActor* target) const;
     void issueFollowCommand(MachActor* followTarget) const;
+    void issueMoveCommand(const MexPoint3d& destination) const;
 
     // Set the active squadron "safely" using squad index, 0...9
     // ... Do nothing if the squad is empty.
@@ -46,6 +47,6 @@ private:
     MachLog1stPersonOpDispatch<MachLogFollowOperation> followDispatcher_;
     MachLog1stPersonOpDispatch<MachLogMoveToOperation> moveDispatcher_;
 
-    // helper for pathfinding priority to use when dispatching follow/move commands
+    // helper for pathfinding priority to use when dispatching follow commands
     static PhysPathFindingPriority getPathfindingPriority();
 };

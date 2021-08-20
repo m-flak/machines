@@ -918,10 +918,10 @@ void MachGuiFirstPerson::update()
             }
         }
 
-        if (commandList_[COMMAND_ORDER_MOVE].on() and canIssueCommands and viableMoveToTarget)
+        if (commandList_[COMMAND_ORDER_MOVE].on() and canIssueCommands and viableMoveToTarget and not viableTarget)
         {
-            // TODO: Implement Move Command!! 8)
-            std::cerr << "MAKE THE MAGIC HAPPEN HERE: " << targetingInfo.getCommandPoint() << std::endl;
+            pCommandWidget_->setMoveIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
+            logHandler.getActiveSquadron().issueMoveCommand(targetingInfo.getCommandPoint());
         }
 	}
 

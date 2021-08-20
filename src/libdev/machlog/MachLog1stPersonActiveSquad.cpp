@@ -101,6 +101,17 @@ void MachLog1stPersonActiveSquadron::issueFollowCommand(MachActor* followTarget)
     }
 }
 
+void MachLog1stPersonActiveSquadron::issueMoveCommand(const MexPoint3d& destination) const
+{
+    if (not hasActiveSquadron() or destination.isZeroPoint())
+    {
+        return;
+    }
+
+    // This is the way they do it elsewhere- a 10m tolerance
+    moveDispatcher_.dispatchOperation(destination, true, 10.0);
+}
+
 void MachLog1stPersonActiveSquadron::setActiveSquadron(size_t squadIndex)
 {
     MachLogRaces& races = MachLogRaces::instance();
