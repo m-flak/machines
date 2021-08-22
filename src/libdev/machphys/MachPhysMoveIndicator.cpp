@@ -3,23 +3,32 @@
 #include "render/texture.hpp"
 #include "render/texmgr.hpp"
 #include "render/colour.hpp"
+#include "world4d/entyplan.hpp"
 
 PER_DEFINE_PERSISTENT( MachPhysMoveIndicator );
 
 MachPhysMoveIndicator::MachPhysMoveIndicator(W4dEntity* pParent, const W4dTransform3d& localTransform, MATHEX_SCALAR size)
     : W4dSprite3d(pParent, localTransform, size, size, getMaterial())
 {
-
+    solid(W4dEntity::NOT_SOLID);
+    doNotLight(true);
+    visible(true);
 }
 
 MachPhysMoveIndicator::MachPhysMoveIndicator( PerConstructor con )
-: W4dSprite3d( con )
+    : W4dSprite3d( con )
 {
 }
 
 MachPhysMoveIndicator::~MachPhysMoveIndicator()
 {
 
+}
+
+void MachPhysMoveIndicator::startFadeOut(const PhysAbsoluteTime& startTime)
+{
+    W4dEntityPlan& entityPlan = entityPlanForEdit();
+    entityPlan.visibilityPlan(getFadeAwayPlan(), startTime);
 }
 
 ostream& operator <<( ostream& o, const MachPhysMoveIndicator& t )
@@ -45,6 +54,21 @@ void perRead( PerIstream& istr, MachPhysMoveIndicator& indicator )
     istr >> base;
 }
 
+//static
+const W4dVisibilityPlanPtr& MachPhysMoveIndicator::getFadeAwayPlan()
+{
+    static W4dVisibilityPlanPtr planPtr = new W4dVisibilityPlan(true);
+    static bool doneOnce = false;
+
+    if (not doneOnce)
+    {
+        doneOnce = true;
+        constexpr auto duration = MachPhysMoveIndicator::DisplayTime;
+        planPtr->add(false, duration);
+    }
+
+    return planPtr;
+}
 
 //static
 RenMaterial MachPhysMoveIndicator::getMaterial()
@@ -56,7 +80,7 @@ RenMaterial MachPhysMoveIndicator::getMaterial()
 //static
 RenTexture MachPhysMoveIndicator::createTexture()
 {
-    static RenTexture indicatorTexture_ = RenTexManager::instance().createTexture("move_indicator.bmp");
+    static RenTexture indicatorTexture_ = RenTexManager::instance().createTexture("move_indicator_t.bmp");
 
     return indicatorTexture_;
 }
@@ -64,8 +88,10 @@ RenTexture MachPhysMoveIndicator::createTexture()
 //static
 RenMaterial MachPhysMoveIndicator::createMaterial()
 {
-    auto material = RenMaterial{ RenColour::black() };
+    auto material = RenMaterial{ RenColour::magenta() };
+    material.emissive(RenColour(1.0, 1.0, 1.0));
     material.texture(createTexture());
+    material.diffuse(RenColour::magenta());
 
     return material;
 }

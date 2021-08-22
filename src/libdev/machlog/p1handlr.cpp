@@ -22,8 +22,10 @@
 #include "world4d/scenemgr.hpp"
 #include "world4d/camera.hpp"
 #include "world4d/domain.hpp"
+#include "world4d/garbcoll.hpp"
 #include "sim/manager.hpp"
 #include "machphys/p1driver.hpp"
+#include "machphys/MachPhysMoveIndicator.hpp"
 #include "machlog/actor.hpp"
 #include "machlog/canattac.hpp"
 #include "machlog/weapon.hpp"
@@ -31,6 +33,7 @@
 #include "machlog/network.hpp"
 #include "machlog/messbrok.hpp"
 #include "machlog/planet.hpp"
+#include "machlog/plandoms.hpp"
 #include "network/netnet.hpp"
 
 class MachLogAimDataFilter;
@@ -55,6 +58,7 @@ public:
     uint healWeaponIndex_; //the index of the heal weapon
     MachLogCamera* pCamera_; //The camera used in 1st person
     MachLogAimDataFilter* pAimDataFiler_; //Filter used on aim data check
+    PhysAbsoluteTime indicatorSpawnTime_; //Assist us in spawning a SINGLE indicator -.-'
 };
 
 //Class used to filter out entities we aren't interested in when looking for what's in line of sight
@@ -120,6 +124,7 @@ MachLog1stPersonHandler::MachLog1stPersonHandler
     pData_->remoteNode_ = networkType == REMOTE;
     pData_->xmitOnUpdate_ = not pData_->remoteNode_;
     pData_->lastXmitTime_ = 0.0;
+    pData_->indicatorSpawnTime_ = 0.0;
 
     TEST_INVARIANT;
 }
@@ -411,6 +416,32 @@ bool MachLog1stPersonHandler::isViableMoveToTarget(const TargetingInfo& targetIn
     }
 
     return viableMoveToTarget;
+}
+
+void MachLog1stPersonHandler::displayMoveIndicator(const MexPoint3d& targetPoint)
+{
+    PhysAbsoluteTime now = SimManager::instance().currentTime();
+    if (now > pData_->indicatorSpawnTime_)
+    {
+        //get domain and transform to use
+        MexTransform3d localTransform;
+        W4dDomain* pDomain = MachLogPlanetDomains::pDomainPosition(targetPoint, 0, &localTransform);
+        //translate a bit on the Z-axis, or else the indicator will be wedged in the ground
+        auto moveUpwards = MexPoint3d{ 1.0, 1.0, 1.5 };
+        localTransform.translate(moveUpwards);
+
+        auto* pMoveIndicator = new MachPhysMoveIndicator(pDomain, localTransform, 1.0);
+        pMoveIndicator->startFadeOut(now);
+
+        W4dGarbageCollector::instance().add(pMoveIndicator, now + MachPhysMoveIndicator::DisplayTime + 10);
+        pData_->indicatorSpawnTime_ = now + MachPhysMoveIndicator::DisplayTime;
+    }
+}
+
+bool MachLog1stPersonHandler::isMoveIndicatorPresent() const
+{
+    PhysAbsoluteTime now = SimManager::instance().currentTime();
+    return not (now > pData_->indicatorSpawnTime_);
 }
 
 void MachLog1stPersonHandler::fire( const MexPoint3d& targetPoint )

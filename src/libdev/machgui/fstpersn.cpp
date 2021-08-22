@@ -728,6 +728,7 @@ void MachGuiFirstPerson::update()
         bool viableShootingTarget = (targetingInfo.shootingTarget != nullptr) and viableTarget;
         bool viableCommandTarget = (targetingInfo.getCommandTarget() != nullptr) and viableTarget;
         bool viableMoveToTarget = logHandler.isPointingTowardsGround() and logHandler.isViableMoveToTarget(targetingInfo);
+        bool moveIndicatorPresent = logHandler.isMoveIndicatorPresent();
 
         // Don't allow the target of ore holos or debris!
         if (viableShootingTarget)
@@ -816,8 +817,8 @@ void MachGuiFirstPerson::update()
                 // Light up Follow Icon (FOLLOW SELF)
                 pCommandWidget_->setFollowIconState(MachGuiFPCommand::CommandIconState::VALID);
 
-                // Only light up Move Icon when pointing at navigable ground
-                if (viableMoveToTarget)
+                // Only light up Move Icon when pointing at navigable ground AND when the indicator disappears
+                if (viableMoveToTarget and not moveIndicatorPresent)
                 {
                     pCommandWidget_->setMoveIconState(MachGuiFPCommand::CommandIconState::VALID);
                 }
@@ -918,10 +919,12 @@ void MachGuiFirstPerson::update()
             }
         }
 
-        if (commandList_[COMMAND_ORDER_MOVE].on() and canIssueCommands and viableMoveToTarget and not viableTarget)
+        if (commandList_[COMMAND_ORDER_MOVE].on() and canIssueCommands and viableMoveToTarget and not viableTarget and not moveIndicatorPresent)
         {
+            const auto& point = targetingInfo.getCommandPoint();
             pCommandWidget_->setMoveIconState(MachGuiFPCommand::CommandIconState::ACTIVATED);
-            logHandler.getActiveSquadron().issueMoveCommand(targetingInfo.getCommandPoint());
+            logHandler.getActiveSquadron().issueMoveCommand(point);
+            logHandler.displayMoveIndicator(point);
         }
 	}
 

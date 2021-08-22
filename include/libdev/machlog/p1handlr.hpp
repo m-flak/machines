@@ -114,6 +114,12 @@ public:
     //Validate targeting info for move commands
     bool isViableMoveToTarget(const TargetingInfo& targetInfo) const;
 
+    //Display the move indicator so player can see where the squad is going
+    void displayMoveIndicator(const MexPoint3d& targetPoint);
+
+    //Use to check if the indicator is still present
+    bool isMoveIndicatorPresent() const;
+
     //Fire each enabled weapon at targetPoint, unless requires an actor
     void fire( const MexPoint3d& targetPoint );
 
