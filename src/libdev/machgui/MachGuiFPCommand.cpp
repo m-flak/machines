@@ -78,7 +78,7 @@ void MachGuiFPCommand::doDisplay()
     const int minY = absoluteBoundary().minCorner().y();
 
     GuiPainter::instance().blit( widgetBody(), Gui::Coord( minX, minY ) );
-    GuiPainter::instance().blit( *pActiveSquadIcon_, Gui::Coord( minX+41, minY+52 ) );
+    GuiPainter::instance().blit( *pActiveSquadIcon_, Gui::Coord( minX+43, minY+50 ) );
 
     // widget.bmp: 130x130
     // the command icons: 64x24
