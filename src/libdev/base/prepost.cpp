@@ -21,7 +21,7 @@ BaseAssertion::AssertionAction_fn_AssertionInfo    BaseAssertion::assertionHandl
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void BaseAssertion::preconditionFail( const char* exprStr, const char* file, const char* line )
+WEAK_SYMBOL void BaseAssertion::preconditionFail( const char* exprStr, const char* file, const char* line )
 {
 	std::string	failString( exprStr );
 	failString += ", ";
@@ -34,7 +34,7 @@ void BaseAssertion::preconditionFail( const char* exprStr, const char* file, con
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void BaseAssertion::postconditionFail( const char* exprStr, const char* file, const char* line )
+WEAK_SYMBOL void BaseAssertion::postconditionFail( const char* exprStr, const char* file, const char* line )
 {
 	std::string	failString = exprStr;
 	failString += ", ";
@@ -49,7 +49,7 @@ void BaseAssertion::postconditionFail( const char* exprStr, const char* file, co
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void BaseAssertion::invariantFail( const char* exprStr, const char* file, const char* line,
+WEAK_SYMBOL void BaseAssertion::invariantFail( const char* exprStr, const char* file, const char* line,
     const char* calledFromFile, const char* calledFromLine )
 {
 	std::string	failString = exprStr;
@@ -68,7 +68,7 @@ void BaseAssertion::invariantFail( const char* exprStr, const char* file, const 
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void BaseAssertion::assertFileExists( const char* fileName, const char* file, const char* line )
+WEAK_SYMBOL void BaseAssertion::assertFileExists( const char* fileName, const char* file, const char* line )
 {
 #ifdef NDEBUG
     return;
@@ -132,7 +132,7 @@ bool BaseAssertion::validFileName( const char* fileName )
 
 //////////////////////////////////////////////////////////////////////////////////
 
-void BaseAssertion::assertFail( const char *msg, const xmsg& xms )
+WEAK_SYMBOL void BaseAssertion::assertFail( const char *msg, const xmsg& xms )
 {
     //  Need a semaphore on this in case one ASSERT triggers others
     //  as the program is exiting

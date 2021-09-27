@@ -104,6 +104,9 @@
     //#define _WIN95APP
     #define _SDLAPP
 
+    #define WEAK_SYMBOL __attribute__((weak))
+#else
+    #define WEAK_SYMBOL
 #endif
 
 //////////////////////////////////////////////////////////////////////
