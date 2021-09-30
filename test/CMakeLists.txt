@@ -1,5 +1,6 @@
 include_directories(
     ${CMAKE_CURRENT_SOURCE_DIR}/../include/libdev
+    ${CMAKE_CURRENT_SOURCE_DIR}/../src/libdev/device
 )
 
 enable_testing(true)
@@ -39,6 +40,8 @@ set(TESTING_THESE_GUYS
 #### Test Cases
 #~:ani
 append_test(FrameScalerTests ani/FrameScalerTests.cpp)
+#~:device
+append_test(DevButtonEventTests device/DevButtonEventTests.cpp)
 #~:system
 append_test(SysPathNameTests system/SysPathNameTests.cpp)
 
@@ -51,6 +54,7 @@ foreach( val RANGE ${len2} )
     add_executable(${test_name} AssertionOverrides.cpp ${test_src})
     target_link_libraries( ${test_name}
         gtest
+        gmock
         gtest_main
         ${TESTING_THESE_GUYS}
         libaudio

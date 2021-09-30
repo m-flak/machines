@@ -16,9 +16,10 @@
 #include "mathex/point3d.hpp"
 #include "mathex/transf3d.hpp"
 #include "device/timer.hpp"
+#include "device/butevent.hpp"
 #include "gui/gui.hpp"
 
-class DevButtonEvent;
+//class DevButtonEvent;
 class DevKeyToCommandTranslator;
 class PhysFlyControl;
 class PhysZenithFlyControl;

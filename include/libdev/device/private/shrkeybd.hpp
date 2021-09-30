@@ -6,9 +6,9 @@
 #ifndef DEVICE_SHARED_KEYBOARD_HPP
 #define DEVICE_SHARED_KEYBOARD_HPP
 
-#ifndef DEVICE_KEYBOARD
-	#error Do not include shrkeybd.hpp file directly, include keyboard.hpp
-#endif
+//#ifndef DEVICE_KEYBOARD
+//	#error Do not include shrkeybd.hpp file directly, include keyboard.hpp
+//#endif
 
 #include "base/base.hpp"
 //class ostream;

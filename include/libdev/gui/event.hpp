@@ -6,11 +6,12 @@
 #ifndef _GUI_EVENT_HPP
 #define _GUI_EVENT_HPP
 
+#include "device/butevent.hpp"
 #include "device/keyboard.hpp"
 #include "device/mouse.hpp"
 #include "gui/gui.hpp"
 
-class DevButtonEvent;
+//class DevButtonEvent;
 
 // GuiCharEvent. We may want to add a separate class at some point.
 typedef DevButtonEvent GuiCharEvent;

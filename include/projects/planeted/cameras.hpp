@@ -13,12 +13,13 @@
 #define _MACHGUI_CAMERAS_HPP
 
 #include "base/base.hpp"
+#include "device/butevent.hpp"
 #include "mathex/point3d.hpp"
 #include "mathex/transf3d.hpp"
 #include "device/timer.hpp"
 #include "machlog/camera.hpp"
 
-class DevButtonEvent;
+//class DevButtonEvent;
 class DevKeyToCommandTranslator;
 class PhysFlyControl;
 class PhysZenithFlyControl;

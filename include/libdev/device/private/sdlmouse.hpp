@@ -10,8 +10,9 @@
 //////////////////////////////////////////////////////////////////////
 #include "base/base.hpp"
 #include "device/private/shrmouse.hpp"
+#include "device/butevent.hpp"
 
-class DevButtonEvent;
+//class DevButtonEvent;
 
 //////////////////////////////////////////////////////////////////////
 // Mouse support under the SDL2.0 system.  This class
