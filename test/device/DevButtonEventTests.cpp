@@ -35,7 +35,6 @@ public:
 
 TEST(DevButtonEventTests, GetAgeOfButtonEvent)
 {
-    //using ButtonEvent = DevButtonEventT<MockDevTime>;
     MockDevTime mockTimeSingleton;
 
     EXPECT_CALL(mockTimeSingleton, time())
@@ -43,7 +42,7 @@ TEST(DevButtonEventTests, GetAgeOfButtonEvent)
             .WillOnce(Return(10001.0));
 
     auto buttonEvent =
-            ButtonEvent{ ButtonEvent::ScanCode::HOME_PAD, ButtonEvent::PRESS, false, false, false, false, 10000.0, 20, 20, 0, 'H' };
+            ButtonEvent{ ButtonEvent::ScanCode::HOME_PAD, ButtonEvent::PRESS, false, false, false, false, 10000.0, 20, 20, 1, 'H' };
 
     buttonEvent.setMock(&mockTimeSingleton);
 
@@ -53,7 +52,7 @@ TEST(DevButtonEventTests, GetAgeOfButtonEvent)
 TEST(DevButtonEventTests, GetPrintableCharOfButtonEvent_WhenInvalid)
 {
     auto buttonEvent =
-            ButtonEvent{ ButtonEvent::ScanCode::HOME_PAD, ButtonEvent::PRESS, false, false, false, false, 10000.0, 20, 20, 0, '\xF4' };
+            ButtonEvent{ ButtonEvent::ScanCode::HOME_PAD, ButtonEvent::PRESS, false, false, false, false, 10000.0, 20, 20, 1, '\xF4' };
 
     // In Machines and PlanetEd, the PRE() would flip out. Not here :)
     ASSERT_EQ('\xF4', buttonEvent.printableChar());

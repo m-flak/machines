@@ -3,6 +3,11 @@
 #include <functional>
 #include <memory>
 
+/**
+ * The DependencyProvider allows us to substitute any Singleton dependencies.
+ *
+ * Always provide a specialization of getProvided() for a given dependency.
+ */
 template<typename Dependency>
 class DependencyProvider
 {

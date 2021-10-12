@@ -42,6 +42,7 @@ set(TESTING_THESE_GUYS
 append_test(FrameScalerTests ani/FrameScalerTests.cpp)
 #~:device
 append_test(DevButtonEventTests device/DevButtonEventTests.cpp)
+append_test(DevEventQueueTests device/DevEventQueueTests.cpp)
 #~:system
 append_test(SysPathNameTests system/SysPathNameTests.cpp)
 

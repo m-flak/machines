@@ -34,7 +34,7 @@ public:
 	// appears to require a default ctor.
     DevButtonEventT();
 
-	// PRE(time <= DevTime::instance().time());
+    // Repeat count NEEDS to be >= 1
     DevButtonEventT(ScanCode, Action, bool previous, bool shift, bool ctrl, bool alt,
 				   double time, int x, int y, ushort repeat, char print=0);
 
@@ -121,7 +121,7 @@ ostream& operator<<(ostream& o, const DevButtonEventT<DevTimeDep>&);
 using DevButtonEvent = DevButtonEventT<DevTime>;
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-// I fucking hate templates
+// Avoid ODR hell
 template<>
 inline ostream& operator <<( ostream& o, const DevButtonEvent& t )
 {
