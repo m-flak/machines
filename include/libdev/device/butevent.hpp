@@ -13,11 +13,6 @@
 
 #include "device/time.hpp"
 #include "utility/DependencyProvider.hpp"
-template<>
-inline DevTime& DependencyProvider<DevTime>::getProvided()
-{
-    return DevTime::instance();
-}
 
 // Objects of this type describe a button press or release event.
 

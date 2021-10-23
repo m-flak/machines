@@ -13,20 +13,6 @@
 #include "recorder/recorder.hpp"
 #include "recorder/private/recpriv.hpp"
 #include "utility/DependencyProvider.hpp"
-template<>
-inline RecRecorder& DependencyProvider<RecRecorder>::getProvided()
-{
-    return RecRecorder::instance();
-}
-template<>
-inline RecRecorderPrivate& DependencyProvider<RecRecorderPrivate>::getProvided()
-{
-    return RecRecorderPrivate::instance();
-}
-
-
-//class ostream;
-//template <class T> class ctl_list;
 
 // Stores a FIFO of input device events (currently just button events).
 template<typename RecRecorderDep = RecRecorder, typename RecRecorderPrivDep = RecRecorderPrivate, typename DevTimeDep = DevTime>
@@ -88,7 +74,8 @@ private:
 	// Only these classes can add events to the back of the queue.
 	friend class DevWin95Keyboard;
 	friend class DevSdlKeyboard;
-	friend class DevMouse;
+    // DevMouse is an alias of this:
+    template<typename,typename,typename,typename> friend class DevMouseT;
 
 	// Internal convenience methods.
     bool filterEvent(const DevButtonEventType&) const;
@@ -139,6 +126,15 @@ public:
 using DevEventQueue = DevEventQueueT<RecRecorder, RecRecorderPrivate, DevTime>;
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+
+/* *******************************************************
+ * SINGLETON DEPENDENCY PROVIDER
+ */
+template<>
+inline DevEventQueue& DependencyProvider<DevEventQueue>::getProvided()
+{
+    return DevEventQueue::instance();
+}
 
 #endif
 

@@ -11,16 +11,25 @@
 #include "base/base.hpp"
 #include "device/private/shrmouse.hpp"
 #include "device/butevent.hpp"
+#include "device/SdlDelegate.hpp"
 
-//class DevButtonEvent;
+#include "recorder/recorder.hpp"
+#include "recorder/private/recpriv.hpp"
+#include "device/time.hpp"
+#include "device/eventq.hpp"
+#include "utility/DependencyProvider.hpp"
 
 //////////////////////////////////////////////////////////////////////
 // Mouse support under the SDL2.0 system.  This class
 // should share the same protocol as other classes for differnt OSs.
-class DevMouse : public DevSharedMouse
+template<typename RecRecorderDep = RecRecorder, typename RecRecorderPrivDep = RecRecorderPrivate, typename DevTimeDep = DevTime, typename DEQDep = DevEventQueue>
+class DevMouseT : public DevSharedMouse
 {
 public:
-	static DevMouse& instance();
+    // No dependency provider for: DevTimeDep
+    using DevButtonEventType = DevButtonEventT<DevTimeDep>;
+
+    static DevMouseT& instance();
 
     //  Return the absolute mouse position
     //  ( clipped by the range limits )
@@ -57,11 +66,25 @@ public:
 	// return value use the coordinate system of this class's position fn.
 	Position getMessagePos() const;
 
+protected:
+    //  Singleton
+    DevMouseT();
+    explicit DevMouseT(SdlDelegate* useInstead);
+    ~DevMouseT();
+
+    DependencyProvider<RecRecorderDep>         recorderDependency_;
+    DependencyProvider<RecRecorderPrivDep>     recorderPrivDependency_;
+    DependencyProvider<DEQDep>                 eventQueueDependency_;
+
+    void wm_button(const DevButtonEventType&);
+
 private:
 	friend class AfxSdlApp;
-	void wm_button(const DevButtonEvent&);
 
 	void resetPosition();
+
+    SdlDelegate  sdlDelegate_;
+    SdlDelegate* pSdl_;        // <-- Use me
 
 	Position	position_;
 	Position	lastPosition_;
@@ -70,10 +93,10 @@ private:
 	bool		rButtonPressed_;
 	Position	maxPosition_;
 	double		scaleX_, scaleY_;
-
-	//  Singleton
-	DevMouse();
-	~DevMouse();
 };
+
+// !!!!!!!! CONCRETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+using DevMouse = DevMouseT<RecRecorder, RecRecorderPrivate, DevTime, DevEventQueue>;
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #endif
