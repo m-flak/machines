@@ -44,7 +44,7 @@ Released as a [free software](https://en.wikipedia.org/wiki/Free_software) under
 **Build dependencies**
 Use provided Docker image for building or manually setup your environment.
 
-`libsdl2-dev libsdl2-image-dev libopenal-dev libalure-dev libenet-dev libfreetype6-dev libglew-dev libglm-dev libaudio-dev`
+`libsdl2-dev libsdl2-image-dev libopenal-dev libalure-dev libenet-dev libfreetype6-dev libglew-dev libglm-dev libaudio-dev libswscale-dev`
 
 **Building**
 `git clone && git lfs pull`
