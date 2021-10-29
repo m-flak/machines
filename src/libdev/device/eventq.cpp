@@ -25,6 +25,11 @@ DevEventQueueT<RecRecorderDep, RecRecorderPrivDep, DevTimeDep>::DevEventQueueT()
         pressFilter_[i] = releaseFilter_[i] = false;
     }
 
+    // The middle mouse wheel is the only button that would receive these.
+    // Explicity ask for these using queueEvents w/ middle mouse wheel scan code.
+    scrollUpFilter_   = false;
+    scrollDownFilter_ = false;
+
     TEST_INVARIANT;
 }
 
@@ -110,6 +115,10 @@ bool DevEventQueueT<RecRecorderDep, RecRecorderPrivDep, DevTimeDep>::filterEvent
             return releaseFilter_[event.scanCode()];
         case ButtonEvent::PRESS:
             return   pressFilter_[event.scanCode()];
+        case ButtonEvent::SCROLL_UP:
+            return (event.scanCode() == DevKey::MIDDLE_MOUSE and scrollUpFilter_);
+        case ButtonEvent::SCROLL_DOWN:
+            return (event.scanCode() == DevKey::MIDDLE_MOUSE and scrollDownFilter_);
         default:
             ASSERT_BAD_CASE;
         break;
@@ -146,6 +155,14 @@ void DevEventQueueT<RecRecorderDep, RecRecorderPrivDep, DevTimeDep>::queueEvents
         case ButtonEvent::PRESS:
             pressFilter_[code] = true;
         break;
+        case ButtonEvent::SCROLL_UP:
+            // only set for middle mouse
+            scrollUpFilter_ = code == DevKey::MIDDLE_MOUSE;
+        break;
+        case ButtonEvent::SCROLL_DOWN:
+            // only set for middle mouse
+            scrollDownFilter_ = code == DevKey::MIDDLE_MOUSE;
+        break;
         default:
             ASSERT_BAD_CASE;
         break;
@@ -165,6 +182,14 @@ void DevEventQueueT<RecRecorderDep, RecRecorderPrivDep, DevTimeDep>::dontQueueEv
         break;
         case ButtonEvent::PRESS:
             pressFilter_[code] = false;
+        break;
+        case ButtonEvent::SCROLL_UP:
+            // only set for middle mouse
+            scrollUpFilter_ = (code == DevKey::MIDDLE_MOUSE) ? false : scrollUpFilter_;
+        break;
+        case ButtonEvent::SCROLL_DOWN:
+            // only set for middle mouse
+            scrollDownFilter_ = (code == DevKey::MIDDLE_MOUSE) ? false : scrollDownFilter_;
         break;
         default:
             ASSERT_BAD_CASE;

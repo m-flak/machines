@@ -58,6 +58,8 @@ public:
 
     using DevEventQueueT<MockRecRecorder, MockRecRecorderPrivate, DevTime>::getReleaseFilterFor;
     using DevEventQueueT<MockRecRecorder, MockRecRecorderPrivate, DevTime>::getPressFilterFor;
+    using DevEventQueueT<MockRecRecorder, MockRecRecorderPrivate, DevTime>::getScrollUpFilter;
+    using DevEventQueueT<MockRecRecorder, MockRecRecorderPrivate, DevTime>::getScrollDownFilter;
     using DevEventQueueT<MockRecRecorder, MockRecRecorderPrivate, DevTime>::queueEvent;
 };
 
@@ -203,4 +205,40 @@ TEST(DevEventQueueTests, QueueNewEventAndRetrieveIt_RepeatEvents)
     ASSERT_EQ('H', retrievedEvent.getChar());
     // The result event will have repeat count of 1
     ASSERT_GE(1, retrievedEvent.repeatCount());
+}
+
+TEST(DevEventQueueTests, QueueNewEventAndRetrieveIt_MouseScrollEvent)
+{
+    MockRecRecorder recorder;
+    MockRecRecorderPrivate privRecorder;
+
+    EXPECT_CALL(recorder, state())
+            .WillRepeatedly(Return(RecRecorder::INACTIVE));
+
+    EventQueue_RealTime eventQueue;
+    eventQueue.setMocks(&recorder, &privRecorder);
+
+    auto scrollUpEvent =
+            EventQueue_RealTime::DevButtonEventType{ DevKey::MIDDLE_MOUSE, EventQueue_RealTime::Action::SCROLL_UP, false, false, false, false, 1.0, 0, 0, 1, '\xBE' };
+    auto scrollDownEvent =
+            EventQueue_RealTime::DevButtonEventType{ DevKey::MIDDLE_MOUSE, EventQueue_RealTime::Action::SCROLL_DOWN, false, false, false, false, 1.0, 0, 0, 1, '\xBF' };
+
+    eventQueue.queueEvents(DevKey::MIDDLE_MOUSE, EventQueue_RealTime::Action::SCROLL_UP);
+    ASSERT_EQ(true, eventQueue.getScrollUpFilter());
+    eventQueue.queueEvents(DevKey::MIDDLE_MOUSE, EventQueue_RealTime::Action::SCROLL_DOWN);
+    ASSERT_EQ(true, eventQueue.getScrollDownFilter());
+
+    eventQueue.queueEvent(scrollUpEvent);
+    eventQueue.queueEvent(scrollDownEvent);
+    ASSERT_EQ(2, eventQueue.length());
+
+    auto upEvent = eventQueue.oldestEvent();
+    auto downEvent = eventQueue.oldestEvent();
+    ASSERT_EQ('\xBE', upEvent.getChar());
+    ASSERT_EQ('\xBF', downEvent.getChar());
+
+    eventQueue.dontQueueEvents(DevKey::MIDDLE_MOUSE, EventQueue_RealTime::Action::SCROLL_UP);
+    ASSERT_EQ(false, eventQueue.getScrollUpFilter());
+    eventQueue.dontQueueEvents(DevKey::MIDDLE_MOUSE, EventQueue_RealTime::Action::SCROLL_DOWN);
+    ASSERT_EQ(false, eventQueue.getScrollDownFilter());
 }

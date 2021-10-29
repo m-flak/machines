@@ -19,6 +19,7 @@ DevButtonEventT<DevTimeDep>::DevButtonEventT
 	char print
 ):
 	code_(code),
+    action_(action),
 	press_(action == PRESS),
 	previous_( prev ? 1 : 0 ),
 	shift_(shift),
@@ -39,6 +40,7 @@ DevButtonEventT<DevTimeDep>::DevButtonEventT
 template<typename DevTimeDep>
 DevButtonEventT<DevTimeDep>::DevButtonEventT():
 	code_(DevKey::MAX_CODE),
+    action_(PRESS),
 	press_(PRESS),
 	previous_(0),
 	shift_(0),
@@ -54,6 +56,7 @@ DevButtonEventT<DevTimeDep>::DevButtonEventT():
 template<typename DevTimeDep>
 DevButtonEventT<DevTimeDep>::DevButtonEventT(const DevButtonEventT& b):
 	code_(b.code_),
+    action_(b.action_),
 	press_(b.press_),
 	previous_(b.previous_),
 	shift_(b.shift_),
@@ -75,6 +78,7 @@ DevButtonEventT<DevTimeDep>& DevButtonEventT<DevTimeDep>::operator=(const DevBut
 	ctrl_			= b.ctrl_;
 	printable_		= b.printable_;
 	code_			= b.code_;
+    action_         = b.action_;
 	coords_			= b.coords_;
 	repeatCount_	= b.repeatCount_;
 	time_			= b.time_;
@@ -91,7 +95,7 @@ typename DevButtonEventT<DevTimeDep>::ScanCode DevButtonEventT<DevTimeDep>::scan
 template<typename DevTimeDep>
 typename DevButtonEventT<DevTimeDep>::Action DevButtonEventT<DevTimeDep>::action() const
 {
-	return (press_)? PRESS: RELEASE;
+    return action_;
 }
 
 template<typename DevTimeDep>
@@ -197,6 +201,7 @@ template<typename DevTimeDep>
 bool DevButtonEventT<DevTimeDep>::operator==(const DevButtonEventT& ev) const
 {
 	return	code_      == ev.code_      &&
+            action_    == ev.action_    &&
 			coords_    == ev.coords_    &&
 			printable_ == ev.printable_ &&
 			press_     == ev.press_     &&

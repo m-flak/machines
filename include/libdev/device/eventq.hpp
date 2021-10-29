@@ -14,7 +14,7 @@
 #include "recorder/private/recpriv.hpp"
 #include "utility/DependencyProvider.hpp"
 
-// Stores a FIFO of input device events (currently just button events).
+// Stores a FIFO of input device events.
 template<typename RecRecorderDep = RecRecorder, typename RecRecorderPrivDep = RecRecorderPrivate, typename DevTimeDep = DevTime>
 class DevEventQueueT
 {
@@ -42,6 +42,8 @@ public:
 	// PRE(code < DevKey::MAX_CODE);  applies to all ScanCode args
 	void queueEvents(ScanCode);
 	void dontQueueEvents(ScanCode);
+
+    // For Scroll Up & Scroll Down for mouse wheel, execute these.
 	void queueEvents(ScanCode, Action);
 	void dontQueueEvents(ScanCode, Action);
 
@@ -66,6 +68,8 @@ protected:
 
     constexpr inline uchar getReleaseFilterFor(ScanCode code) const { return releaseFilter_[code]; }
     constexpr inline uchar getPressFilterFor(ScanCode code) const { return pressFilter_[code]; }
+    constexpr inline bool  getScrollUpFilter() const { return scrollUpFilter_; }
+    constexpr inline bool  getScrollDownFilter() const { return scrollDownFilter_; }
 
     // PRE(event.scanCode() < DevKey::MAX_CODE);
     void queueEvent(const DevButtonEventType&);
@@ -85,6 +89,9 @@ private:
 	// These tables determine which events are queued.
 	uchar	releaseFilter_[DevKey::MAX_CODE];
 	uchar	  pressFilter_[DevKey::MAX_CODE];
+
+    bool scrollUpFilter_;
+    bool scrollDownFilter_;
 
     // Operation deliberately revoked
     DevEventQueueT( const DevEventQueueT& );

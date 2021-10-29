@@ -81,8 +81,11 @@ public:
 		// keyboard keys.
 		LEFT_MOUSE = 256, RIGHT_MOUSE = 257,
 
+        // Not trusting that these guys didn't go LEFT_MOUSE+1 or something janky somewhere
+        MIDDLE_MOUSE = 258,
+
 		// This *must* be the highest code in this enumeration plus 1.
-		MAX_CODE = 258
+        MAX_CODE = 259
 	};
 
 	static void printScanCode(ostream&, ScanCode);

@@ -35,8 +35,10 @@ public:
     //  ( clipped by the range limits )
 	const Position& position() const;
 
-	bool  leftButton() const;
-	bool rightButton() const;
+    bool  leftButton() const;
+    bool  rightButton() const;
+    bool  wheelScrollUp() const;
+    bool  wheelScrollDown() const;
 
     // These all return the change in state since the last time
 	// the method was called.
@@ -86,13 +88,14 @@ private:
     SdlDelegate  sdlDelegate_;
     SdlDelegate* pSdl_;        // <-- Use me
 
-	Position	position_;
-	Position	lastPosition_;
-	int			cursorVisible_;
-	bool		lButtonPressed_;
-	bool		rButtonPressed_;
-	Position	maxPosition_;
-	double		scaleX_, scaleY_;
+    mutable Position    position_;
+    Position            lastPosition_;
+    int                 cursorVisible_;
+    bool                lButtonPressed_;
+    bool                rButtonPressed_;
+    Position            maxPosition_;
+    double              scaleX_, scaleY_;
+    mutable bool        scrolledUp_, scrolledDown_;
 };
 
 // !!!!!!!! CONCRETE !!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -25,6 +25,9 @@ void BaseAssertion::assertFileExists(const char* fileName, const char* file, con
 void BaseAssertion::assertFail(const char *msg, const xmsg& xms)
 {
     std::cerr << "BaseAssertion::assertFail disabled for unit testing." << std::endl;
+    auto what = std::string{ xms.what() };
+    std::cerr << "\tASSERT_FAIL( " << what << " ) - Message: " << msg << std::endl;
+
     return;
 }
 

@@ -21,7 +21,9 @@ DEV_MOUSE_CLASS::DevMouseT()
     lButtonPressed_(false),
     rButtonPressed_(false),
     scaleX_(1),
-    scaleY_(1)
+    scaleY_(1),
+    scrolledUp_(false),
+    scrolledDown_(false)
 {
     resetPosition();
     lastPosition_ = position_;
@@ -85,11 +87,9 @@ template<typename RecRecorderDep, typename RecRecorderPrivDep, typename DevTimeD
 const typename DEV_MOUSE_CLASS::Position&  // RETURN TYPE. Method below:
 DEV_MOUSE_CLASS::position() const
 {
-    DevMouseT* nonConstThis = const_cast<DevMouseT*>(this);
-
     if( recorderDependency_.get().state() == RecRecorder::PLAYING )
     {
-        nonConstThis->position_ = recorderPrivDependency_.get().playbackMousePosition();
+        position_ = recorderPrivDependency_.get().playbackMousePosition();
     }
     else
     {
@@ -127,9 +127,7 @@ DEV_MOUSE_CLASS::deltaLeftButton() const
     else
         result = RELEASED;
 
-    DevMouseT* nonConstThis = const_cast<DevMouseT*>(this);
-
-    nonConstThis->lastLeftButtonState_ = currentLeftButtonState;
+    lastLeftButtonState_ = currentLeftButtonState;
 
     return result;
 }
@@ -149,9 +147,7 @@ DEV_MOUSE_CLASS::deltaRightButton() const
     else
         result = RELEASED;
 
-    DevMouseT* nonConstThis = const_cast<DevMouseT*>(this);
-
-    nonConstThis->lastRightButtonState_ = currentRightButtonState;
+    lastRightButtonState_ = currentRightButtonState;
 
     return result;
 }
@@ -159,23 +155,27 @@ DEV_MOUSE_CLASS::deltaRightButton() const
 template<typename RecRecorderDep, typename RecRecorderPrivDep, typename DevTimeDep, typename DEQDep>
 void DEV_MOUSE_CLASS::wm_button(const DevButtonEventType& ev)
 {
-	PRE(ev.scanCode() == DevKey::LEFT_MOUSE || ev.scanCode() == DevKey::RIGHT_MOUSE);
+    PRE(ev.scanCode() == DevKey::LEFT_MOUSE || ev.scanCode() == DevKey::RIGHT_MOUSE || ev.scanCode() == DevKey::MIDDLE_MOUSE);
 
-	// Decode the message and set this object's internal state.
-	switch (ev.scanCode())
-	{
-		case DevKey::LEFT_MOUSE:
-			lButtonPressed_ = ev.action() == DevButtonEvent::PRESS;
-			break;
-		case DevKey::RIGHT_MOUSE:
-			rButtonPressed_ = ev.action() == DevButtonEvent::PRESS;
-			break;
-	}
+    // Decode the message and set this object's internal state.
+    switch (ev.scanCode())
+    {
+        case DevKey::LEFT_MOUSE:
+            lButtonPressed_ = ev.action() == DevButtonEventType::PRESS;
+        break;
+        case DevKey::RIGHT_MOUSE:
+            rButtonPressed_ = ev.action() == DevButtonEventType::PRESS;
+        break;
+        case DevKey::MIDDLE_MOUSE:
+            scrolledUp_   = ev.action() == DevButtonEventType::SCROLL_UP;
+            scrolledDown_ = ev.action() == DevButtonEventType::SCROLL_DOWN;
+        break;
+    }
 
-	// The coords in the event should already be scaled correctly, so bypass
-	// the position set method because it also applies a scale.
-	position_.first  = ev.cursorCoords().x();
-	position_.second = ev.cursorCoords().y();
+    // The coords in the event should already be scaled correctly, so bypass
+    // the position set method because it also applies a scale.
+    position_.first  = ev.cursorCoords().x();
+    position_.second = ev.cursorCoords().y();
 
     // Pass the message onto the event queue.
     eventQueueDependency_.get().queueEvent(ev);
@@ -222,6 +222,56 @@ bool DEV_MOUSE_CLASS::rightButton() const
         }
     }
 
+    return result;
+}
+
+template<typename RecRecorderDep, typename RecRecorderPrivDep, typename DevTimeDep, typename DEQDep>
+bool DEV_MOUSE_CLASS::wheelScrollUp() const
+{
+    bool result;
+
+    if( recorderDependency_.get().state() == RecRecorder::PLAYING )
+    {
+        std::cerr << "WARN: Recording/Playback NOT SUPPORTED for wheelScrollUp()" << std::endl;
+        result = false;
+    }
+    else
+    {
+        result = scrolledUp_;
+
+        if( recorderDependency_.get().state() == RecRecorder::RECORDING )
+        {
+            std::cerr << "WARN: Recording/Playback NOT SUPPORTED for wheelScrollUp()" << std::endl;
+        }
+    }
+
+    // We shall say the mouse is no longer scrolling until the next scroll event flips it back to true
+    scrolledUp_ = false;
+    return result;
+}
+
+template<typename RecRecorderDep, typename RecRecorderPrivDep, typename DevTimeDep, typename DEQDep>
+bool DEV_MOUSE_CLASS::wheelScrollDown() const
+{
+    bool result;
+
+    if( recorderDependency_.get().state() == RecRecorder::PLAYING )
+    {
+        std::cerr << "WARN: Recording/Playback NOT SUPPORTED for wheelScrollDown()" << std::endl;
+        result = false;
+    }
+    else
+    {
+        result = scrolledDown_;
+
+        if( recorderDependency_.get().state() == RecRecorder::RECORDING )
+        {
+            std::cerr << "WARN: Recording/Playback NOT SUPPORTED for wheelScrollDown()" << std::endl;
+        }
+    }
+
+    // We shall say the mouse is no longer scrolling until the next scroll event flips it back to true
+    scrolledDown_ = false;
     return result;
 }
 

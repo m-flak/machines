@@ -23,7 +23,7 @@ class DevButtonEventT
 {
 public:
     using ScanCode = DevKey::ScanCode;
-	enum Action { PRESS, RELEASE };
+    enum Action { PRESS, RELEASE, SCROLL_UP, SCROLL_DOWN };
 
 	// There's no useful reason for creating default events, but ctl_list
 	// appears to require a default ctor.
@@ -100,6 +100,7 @@ protected:
 private:
 	Coord		coords_;
 	ScanCode	code_;
+    Action      action_;
 
 	// Space is at a premium because these objects are copied by value.  Hence,
 	// we use only float precision for time and bitfields for all the bools.
