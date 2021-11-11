@@ -76,7 +76,7 @@ public:
 
 	// Called when mouse is at edge of screen.
 	enum ScrollDir { LEFT, RIGHT, UP, DOWN };
-	void scroll( ScrollDir, const GuiMouseEvent& event );
+    void scroll( ScrollDir, const GuiMouseEvent& event, const double speedOverride=0.0 );
 
 	bool isZenithCameraActive() const;
 	bool isGroundCameraActive() const;

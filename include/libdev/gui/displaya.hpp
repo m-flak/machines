@@ -115,6 +115,7 @@ public:
 	virtual void doHandleMouseClickEvent( const GuiMouseEvent& rel );
 	virtual void doHandleMouseEnterEvent( const GuiMouseEvent& rel );
 	virtual void doHandleMouseExitEvent( const GuiMouseEvent& rel );
+    virtual void doHandleMouseScrollEvent( const GuiMouseEvent& rel );
 	virtual void doHandleContainsMouseEvent( const GuiMouseEvent& rel );
 
 	unsigned width() const;

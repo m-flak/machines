@@ -72,10 +72,17 @@ public:
         Gui::ButtonState right,
         ModifierKeys );
 
+    GuiMouseEvent(  const Gui::Coord& at,
+        Gui::ButtonState left,
+        Gui::ButtonState right,
+        Gui::ScrollState scroll,
+        ModifierKeys );
+
     ///////////////////////////////
 
     Gui::ButtonState leftButton() const;
     Gui::ButtonState rightButton() const;
+    Gui::ScrollState scrollDirection() const;
 
     // absolute coord
     const Gui::Coord& coord() const;
@@ -98,6 +105,7 @@ private:
     Gui::Coord            coord_;
     Gui::ButtonState    leftButton_;
     Gui::ButtonState    rightButton_;
+    Gui::ScrollState    scroll_;
 
     friend bool operator <( const GuiMouseEvent& a, const GuiMouseEvent& b );
     friend bool operator ==( const GuiMouseEvent& a, const GuiMouseEvent& b );

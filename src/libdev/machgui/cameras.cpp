@@ -631,10 +631,19 @@ void MachCameras::lookAt( const MachActor& actor )
 	}
 }
 
-void MachCameras::scroll( ScrollDir scrollDir, const GuiMouseEvent& event )
+void MachCameras::scroll( ScrollDir scrollDir, const GuiMouseEvent& event, const double speedOverride )
 {
+    double oldSpeed = 0.0;
+
 	if ( pCurrentCamera_ == pZenithCamera_ )
 	{
+        if (speedOverride > 0.0)
+        {
+            oldSpeed = pZenithControl_->metresPerSecond();
+            pZenithControl_->metresPerSecond(speedOverride);
+            pZenithControl_->update();
+        }
+
 		switch ( scrollDir )
 		{
 			case LEFT:
@@ -650,22 +659,42 @@ void MachCameras::scroll( ScrollDir scrollDir, const GuiMouseEvent& event )
 					pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::SLIDE_RIGHT );
 				break;
 			case UP:
-				if ( event.rightButton() == Gui::PRESSED )
-					pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::DOWN );
-				else
-					pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::FOWARD );
+                if ( event.rightButton() == Gui::PRESSED or event.scrollDirection() != Gui::ScrollState::NO_SCROLL )
+                {
+                    pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::DOWN );
+                }
+                else
+                {
+                    pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::FOWARD );
+                }
 				break;
 			case DOWN:
-				if ( event.rightButton() == Gui::PRESSED )
-					pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::UP );
-				else
-					pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::BACKWARD );
+                if ( event.rightButton() == Gui::PRESSED or event.scrollDirection() != Gui::ScrollState::NO_SCROLL )
+                {
+                    pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::UP );
+                }
+                else
+                {
+                    pZenithControl_->forceCommandOn( PhysMotionControlWithTrans::BACKWARD );
+                }
 				break;
 		}
+
+        if (oldSpeed > 0.0)
+        {
+            pZenithControl_->metresPerSecond(oldSpeed);
+        }
 	}
 	else if ( pCurrentCamera_ == pGroundCamera_ )
 	{
-			switch ( scrollDir )
+        if (speedOverride > 0.0)
+        {
+            oldSpeed = pGroundControl_->metresPerSecond();
+            pGroundControl_->metresPerSecond(speedOverride);
+            pGroundControl_->update();
+        }
+
+        switch ( scrollDir )
 		{
 			case LEFT:
 				if ( event.rightButton() == Gui::PRESSED )
@@ -680,18 +709,23 @@ void MachCameras::scroll( ScrollDir scrollDir, const GuiMouseEvent& event )
 					pGroundControl_->forceCommandOn( PhysMotionControlWithTrans::ROTATE_RIGHT );
 				break;
 			case UP:
-				if ( event.rightButton() == Gui::PRESSED )
+                if ( event.rightButton() == Gui::PRESSED or event.scrollDirection() != Gui::ScrollState::NO_SCROLL )
 					pGroundControl_->forceCommandOn( PhysMotionControlWithTrans::UP );
 				else
 					pGroundControl_->forceCommandOn( PhysMotionControlWithTrans::FOWARD );
 				break;
 			case DOWN:
-				if ( event.rightButton() == Gui::PRESSED )
+                if ( event.rightButton() == Gui::PRESSED or event.scrollDirection() != Gui::ScrollState::NO_SCROLL )
 					pGroundControl_->forceCommandOn( PhysMotionControlWithTrans::DOWN );
 				else
 					pGroundControl_->forceCommandOn( PhysMotionControlWithTrans::BACKWARD );
 				break;
 		}
+
+        if (oldSpeed > 0.0)
+        {
+            pGroundControl_->metresPerSecond(oldSpeed);
+        }
 	}
 }
 

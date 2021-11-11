@@ -260,7 +260,7 @@ void PhysZenithFlyControl::CLASS_INVARIANT
 PhysZenithMotionConstraint::PhysZenithMotionConstraint()
 :	maxHeight( 250.0 ),
 	minHeight( 20.0 ),
-	maxSpeed( 250.0 ),
+    maxSpeed( 1000.0 ),
 	minSpeed( -250.0 ),
 	maxTurnRate( MexDegrees( 120 ) ),
     minTurnRate( -MexDegrees( 120 ) )

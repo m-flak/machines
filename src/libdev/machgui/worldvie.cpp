@@ -348,6 +348,21 @@ void MachWorldViewWindow::doHandleMouseExitEvent( const GuiMouseEvent& )
 }
 
 //virtual
+void MachWorldViewWindow::doHandleMouseScrollEvent( const GuiMouseEvent& event )
+{
+    // Scroll Up towards screen, ZOOM IN
+    if (event.scrollDirection() == Gui::ScrollState::SCROLL_UP)
+    {
+        pCameras_->scroll( MachCameras::UP, event, 1000.0 );
+    }
+    // Scroll Down away from screen, ZOOM OUT
+    if (event.scrollDirection() == Gui::ScrollState::SCROLL_DOWN)
+    {
+        pCameras_->scroll( MachCameras::DOWN, event, 1000.0 );
+    }
+}
+
+//virtual
 void MachWorldViewWindow::doHandleContainsMouseEvent( const GuiMouseEvent& event )
 {
     //get the 3d line

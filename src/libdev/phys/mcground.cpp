@@ -279,7 +279,7 @@ void PhysGroundFlyControl::update()
 PhysGroundMotionConstraint::PhysGroundMotionConstraint()
 :	maxHeight( 10.0 ),
 	minHeight( 1.4 ),
-	maxSpeed( 70.0 ),
+    maxSpeed( 1000.0 ),
 	minSpeed( -70.0 ),
 	maxTurnRate( MexDegrees( 120 ) ),
     minTurnRate( -MexDegrees( 120 ) ),
