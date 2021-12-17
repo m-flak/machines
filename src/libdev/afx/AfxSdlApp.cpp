@@ -192,6 +192,10 @@ void AfxSdlApp::dispatchEvent(SDL_Event* event)
             dispatchMouseEvent(event, true);
             break;
 
+        case SDL_MOUSEWHEEL:
+            dispatchMouseScrollEvent(event);
+            break;
+
         case SDL_KEYUP:
             dispatchKeybrdEvent(event, false);
             break;
@@ -252,6 +256,46 @@ void AfxSdlApp::dispatchMouseEvent(SDL_Event* event, bool pressed)
     const bool previous = 0;
     const size_t repeats = 1;
 
+    const DevButtonEvent ev(code, act, previous, shift, ctrl, alt, time, x, y, repeats);
+    DevMouse::instance().wm_button(ev);
+}
+
+void AfxSdlApp::dispatchMouseScrollEvent(SDL_Event* event)
+{
+    PRE(event->wheel.y != 0);
+
+    if (event->wheel.which == SDL_TOUCH_MOUSEID)
+    {
+        std::cerr << "Wheel scrolling for touch events not yet implemented." << std::endl;
+        // TODO: Call dispatchTouchScrollEvent() perhaps??
+        return;
+    }
+
+    // If direction is SDL_MOUSEWHEEL_FLIPPED the values in x and y will be opposite.
+    //  Multiply by -1 to change them back.
+    const int multiplier = (event->wheel.direction == SDL_MOUSEWHEEL_NORMAL) ? 1 : -1;
+    const DevButtonEvent::Action act = (event->wheel.y*multiplier > 0) ? DevButtonEvent::SCROLL_UP : DevButtonEvent::SCROLL_DOWN;
+
+    // Get the position of the cursor at the time of the event.
+    const DevMouse::Position pos = DevMouse::instance().getMessagePos();
+    const int x = pos.first;
+    const int y = pos.second;
+
+    // Get the states of the modifiers keys at the time of the event.
+    const Uint8* kStates = SDL_GetKeyboardState(nullptr);
+    const bool shift = kStates[SDL_SCANCODE_LSHIFT] || kStates[SDL_SCANCODE_RSHIFT];
+    const bool ctrl = kStates[SDL_SCANCODE_LCTRL] || kStates[SDL_SCANCODE_RCTRL];
+    const bool alt = kStates[SDL_SCANCODE_LALT] || kStates[SDL_SCANCODE_RALT];
+
+    // Get the message's time.
+    const double time = DevTime::instance().resolution() * event->button.timestamp;
+
+    // Button code & whatnot
+    const DevButtonEvent::ScanCode code = DevKey::MIDDLE_MOUSE;
+    const bool previous = 0;
+    const size_t repeats = 1;
+
+    // DISPATCH!!!
     const DevButtonEvent ev(code, act, previous, shift, ctrl, alt, time, x, y, repeats);
     DevMouse::instance().wm_button(ev);
 }

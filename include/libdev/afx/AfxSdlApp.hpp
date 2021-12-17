@@ -37,6 +37,7 @@ private:
 
     void dispatchEvent(SDL_Event*);
     void dispatchMouseEvent(SDL_Event*, bool);
+    void dispatchMouseScrollEvent(SDL_Event*);
     void dispatchKeybrdEvent(SDL_Event*, bool);
     void dispatchCharEvent(SDL_Event*);
     void dispatchTouchEvent(SDL_Event*, bool);
