@@ -78,6 +78,8 @@ public:
 	enum ScrollDir { LEFT, RIGHT, UP, DOWN };
 	void scroll( ScrollDir, const GuiMouseEvent& event );
 
+    void scrollWithWheel(const Gui::ScrollState wheelDir, const double step);
+
 	bool isZenithCameraActive() const;
 	bool isGroundCameraActive() const;
 	bool is1stPersonCameraActive() const;

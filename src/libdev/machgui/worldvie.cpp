@@ -350,16 +350,7 @@ void MachWorldViewWindow::doHandleMouseExitEvent( const GuiMouseEvent& )
 //virtual
 void MachWorldViewWindow::doHandleMouseScrollEvent( const GuiMouseEvent& event )
 {
-    // Scroll Up towards screen, ZOOM IN
-    if (event.scrollDirection() == Gui::ScrollState::SCROLL_UP)
-    {
-        pCameras_->scroll( MachCameras::UP, event, 1000.0 );
-    }
-    // Scroll Down away from screen, ZOOM OUT
-    if (event.scrollDirection() == Gui::ScrollState::SCROLL_DOWN)
-    {
-        pCameras_->scroll( MachCameras::DOWN, event, 1000.0 );
-    }
+    pCameras_->scrollWithWheel(event.scrollDirection(), 15.0);
 }
 
 //virtual
