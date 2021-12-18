@@ -15,6 +15,7 @@
 
 #include "base/base.hpp"
 
+#include "device/cd_helper.hpp"
 #include "device/cddefs.hpp"
 
 #include <AL/al.h>
@@ -78,7 +79,7 @@ public:
     ///////////////////////////////
 
     // play from beginning to end
-    //void play();
+    void play();
 
     // play only the specified track, auto track repeat can be set
     void play( DevCDTrackIndex track, bool repeat = false );
@@ -104,6 +105,10 @@ public:
 
     // Is an audio CD in the drive?
     bool isAudioCDPresent();
+
+    // Turn on/off the music
+    void enableMusic();
+    void disableMusic();
 
     friend std::ostream& operator <<( std::ostream&, const DevCD& ) ;
 
@@ -140,7 +145,7 @@ private:
 
     ///////////////////////////////
 
-
+    friend void device::helper::cd::configure(DevCD*);
     friend class AfxWin95App;
     friend void eosCallback(void*, ALuint);
 } ;

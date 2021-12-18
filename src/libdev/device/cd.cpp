@@ -9,44 +9,15 @@
 
 #include "device/cd.hpp"
 #include "device/cdlist.hpp"
-#include "mathex/random.hpp"
 #include "system/pathname.hpp"
-//#include <AL/alure.h>
+#include <AL/alure.h>
 
 #define STREAM_NUM_BUFFERS 3
 #define STREAM_BUFFER_SIZE 250000
 #define STREAM_UPDATE_INTERVAL 0.125f
 
-class DevCDImpl
-{
+#include "device/DevCDImpl.hpp"
 
-    enum CDVOLUME
-    {
-        MAX_CDVOLUME = 65535,
-        MIN_CDVOLUME = 0
-    } ;
-
-    /*HMIXER hMixer_;
-    MIXERLINE            mixerLine_;
-    MIXERLINECONTROLS   mixerLineControl_;
-    MIXERCONTROL        mixerControl_;
-    MIXERCONTROLDETAILS mixerControlDetails_;
-    MIXERCONTROLDETAILS_UNSIGNED* pMixerValues_;*/
-    //alureStream*        stream_;
-    //ALuint              source_;
-
-    unsigned int savedVolume_;
-
-    DevCDPlayList* pPlayList_;
-
-    bool haveMixer_;
-
-    DevCDTrackIndex randomStartTrack_;
-    DevCDTrackIndex randomEndTrack_;
-    MexBasicRandom    randomGenerator_;
-
-    friend class DevCD;
-} ;
 /*
 MCIERROR mciSendCommandWithDebugStreaming(MCIDEVICEID IDDevice, UINT uMsg, DWORD fdwCommand, DWORD dwParam, size_t lineNum )
 {
@@ -86,13 +57,18 @@ pImpl_(new DevCDImpl())
         MIXERLINECONTROLS&  mixerLineControl_ = pImpl_-> mixerLineControl_;
         MIXERCONTROL&  mixerControl_ = pImpl_-> mixerControl_;
         MIXERCONTROLDETAILS&  mixerControlDetails_ = pImpl_-> mixerControlDetails_;
-        MIXERCONTROLDETAILS_UNSIGNED*&  pMixerValues_ = pImpl_-> pMixerValues_;*/;
-    //alureStream*&  stream_ = pImpl_-> stream_;
-    //ALuint&  source_ = pImpl_-> source_;
+        MIXERCONTROLDETAILS_UNSIGNED*&  pMixerValues_ = pImpl_-> pMixerValues_;*/
+
+    // This will enable/disable music!
+    device::helper::cd::configure(this);
+
+    alureStream*&  stream_ = pImpl_-> stream_;
+    ALuint&  source_ = pImpl_-> source_;
     unsigned int&  savedVolume_ = pImpl_-> savedVolume_;
     DevCDPlayList*&  pPlayList_ = pImpl_-> pPlayList_;
     bool&  haveMixer_ = pImpl_-> haveMixer_;
     MexBasicRandom&  randomGenerator_ = pImpl_-> randomGenerator_;
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
 
     haveMixer_ = false;
     savedVolume_ = 20;
@@ -107,19 +83,22 @@ pImpl_(new DevCDImpl())
         noErrors = false;
     }*/
 
-    //alGenSources(1, &source_);
-    if (alGetError() != AL_NO_ERROR)
+    if (musicEnabled_)
     {
-        std::cerr << "Failed to create OpenAL source for music mixer!" << std::endl;
-        //alureShutdownDevice();
-        noErrors = false;
+        alGenSources(1, &source_);
+        if (alGetError() != AL_NO_ERROR)
+        {
+            std::cerr << "Failed to create OpenAL source for music mixer!" << std::endl;
+            alureShutdownDevice();
+            noErrors = false;
+        }
+        else
+        {
+            alureStreamSizeIsMicroSec(AL_TRUE);
+            alureUpdateInterval(STREAM_UPDATE_INTERVAL);
+        }
     }
-    else
-    {
-        //alureStreamSizeIsMicroSec(AL_TRUE);
-        //alureUpdateInterval(STREAM_UPDATE_INTERVAL);
-    }
-    //stream_ = nullptr;
+    stream_ = nullptr;
     haveMixer_ = noErrors;
 
     /*HRESULT hr;
@@ -261,10 +240,11 @@ DevCD::~DevCD()
         MIXERCONTROL&  mixerControl_ = pImpl_-> mixerControl_;
         MIXERCONTROLDETAILS&  mixerControlDetails_ = pImpl_-> mixerControlDetails_;
         MIXERCONTROLDETAILS_UNSIGNED*&  pMixerValues_ = pImpl_-> pMixerValues_;*/;
-    //alureStream*&  stream_ = pImpl_-> stream_;
-    //ALuint&  source_ = pImpl_-> source_;
+    alureStream*&  stream_ = pImpl_-> stream_;
+    ALuint&  source_ = pImpl_-> source_;
     unsigned int&  savedVolume_ = pImpl_-> savedVolume_;
     DevCDPlayList*&  pPlayList_ = pImpl_-> pPlayList_;
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
 
     stopPlaying();
 
@@ -273,10 +253,13 @@ DevCD::~DevCD()
 
     //    mixerClose(hMixer_);
 
-    //alDeleteSources(1, &source_);
-    //alureDestroyStream(stream_, 0, nullptr);
+    if (musicEnabled_)
+    {
+        alDeleteSources(1, &source_);
+        alureDestroyStream(stream_, 0, nullptr);
 
-    //alureShutdownDevice();
+        alureShutdownDevice();
+    }
 
     //    delete [] pMixerValues_;
     delete  pPlayList_ ;
@@ -315,11 +298,16 @@ bool DevCD::isPlayingAudioCd() const
     bool isPlaying = (mciStatusParms2.dwReturn == MCI_MODE_PLAY);
      */
     //    return (isAudioCd and isPlaying);
-    //ALuint&  source_ = pImpl_-> source_;
+    ALuint&  source_ = pImpl_-> source_;
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
 
-    //ALint sourceState;
-    //alGetSourcei(source_, AL_SOURCE_STATE, &sourceState);
-    //return sourceState == AL_PLAYING;
+    if (musicEnabled_)
+    {
+        ALint sourceState;
+        alGetSourcei(source_, AL_SOURCE_STATE, &sourceState);
+        return sourceState == AL_PLAYING;
+    }
+
     return false;
 }
 
@@ -373,15 +361,20 @@ void DevCD::volume( Volume newLevel )
         MIXERCONTROLDETAILS&  mixerControlDetails_ = pImpl_-> mixerControlDetails_;
         MIXERCONTROLDETAILS_UNSIGNED*&  pMixerValues_ = pImpl_-> pMixerValues_;*/;
         unsigned int&  savedVolume_ = pImpl_-> savedVolume_;
-        //ALuint&  source_ = pImpl_-> source_;
+        ALuint&  source_ = pImpl_-> source_;
+        bool& musicEnabled_ =  pImpl_->musicEnabled_;
 
         if (newLevel > 100)
         {
             newLevel = 100;
         }
         savedVolume_ = newLevel;
-        ALfloat fVol = (float) (savedVolume_) / 100.0f; // Maybe use log model instead of linear?
-        //alSourcef(source_, AL_GAIN, fVol);
+
+        if (musicEnabled_)
+        {
+            ALfloat fVol = (float) (savedVolume_) / 100.0f; // Maybe use log model instead of linear?
+            alSourcef(source_, AL_GAIN, fVol);
+        }
         /*unsigned int theVolume = ((float)newLevel / 100.0) * DevCDImpl::MAX_CDVOLUME;
 
         pMixerValues_[0].dwValue = theVolume;
@@ -470,6 +463,16 @@ Seconds DevCD::currentTrackTimeRemaining() const
     return 0;
 }
 
+void DevCD::play()
+{
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
+
+    if (musicEnabled_)
+    {
+        play(1);
+    }
+}
+
 void DevCD::playFrom( DevCDTrackIndex track )
 {
     PRE( track >= 0 and track < numberOfTracks() );
@@ -514,9 +517,10 @@ void eosCallback(void *unused, ALuint unused2)
 
 void DevCD::play( DevCDTrackIndex track, bool repeat /* = false */ )
 {
-    //alureStream*&  stream_ = pImpl_-> stream_;
-    //ALuint&  source_ = pImpl_-> source_;
+    alureStream*&  stream_ = pImpl_-> stream_;
+    ALuint&  source_ = pImpl_-> source_;
     unsigned int&  savedVolume_ = pImpl_-> savedVolume_;
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
 
     PRE( track >= 0 and track < numberOfTracks() );
 
@@ -549,37 +553,44 @@ void DevCD::play( DevCDTrackIndex track, bool repeat /* = false */ )
         {
             mciSendCommandWithDebugStreaming(deviceID_, MCI_CLOSE, 0, nullptr, __LINE__);
         }*/
-    //if (stream_)
+    if (musicEnabled_ and stream_ != nullptr)
     {
-        //alureDestroyStream(stream_, 0, nullptr);
+        alureDestroyStream(stream_, 0, nullptr);
     }
-    if (savedVolume_ <= 0) // Muted
+
+    if (not musicEnabled_ or savedVolume_ <= 0) // Muted
+    {
         return;
+    }
 
     char fileName[40];
     sprintf(fileName, "sounds/music/track%d.ogg", trackPlaying_);
     SysPathName filePath(fileName);
-    //stream_ = alureCreateStreamFromFile(filePath.pathname().c_str(), STREAM_BUFFER_SIZE, 0, nullptr);
+    stream_ = alureCreateStreamFromFile(filePath.pathname().c_str(), STREAM_BUFFER_SIZE, 0, nullptr);
 
-    //if (!stream_)
+    if (stream_ == nullptr)
     {
-        //std::cerr << "Could not load " << filePath.pathname() << " reason: " << alureGetErrorString() << std::endl;
+        std::cerr << "Could not load " << filePath.pathname() << " reason: " << alureGetErrorString() << std::endl;
         return;
     }
 
     ALfloat fVol = (float) (savedVolume_) / 100.0f;
-    //alSourcef(source_, AL_GAIN, fVol);
-    //if (!alurePlaySourceStream(source_, stream_, STREAM_NUM_BUFFERS, 0, eosCallback, nullptr))
+    alSourcef(source_, AL_GAIN, fVol);
+    if (!alurePlaySourceStream(source_, stream_, STREAM_NUM_BUFFERS, 0, eosCallback, nullptr))
     {
-        //std::cerr << "Failed to play stream: " << alureGetErrorString() << std::endl;
+        std::cerr << "Failed to play stream: " << alureGetErrorString() << std::endl;
         return;
     }
     //std::cout << "Playing track: " << trackPlaying_ << " volume: " << savedVolume_ << std::endl;
 
     if ( repeat )
+    {
         status_ = REPEAT;
+    }
     else
+    {
         status_ = SINGLE;
+    }
 }
 
 void DevCD::play( const DevCDPlayList& params )
@@ -597,8 +608,13 @@ void DevCD::play( const DevCDPlayList& params )
 void DevCD::stopPlaying()
 {
     //    mciSendCommandWithDebugStreaming(deviceID_, MCI_STOP, nullptr, nullptr, __LINE__);
-    //ALuint&  source_ = pImpl_-> source_;
-    //alureStopSource(source_, AL_FALSE);
+    ALuint&  source_ = pImpl_-> source_;
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
+
+    if (musicEnabled_)
+    {
+        alureStopSource(source_, AL_FALSE);
+    }
 }
 
 void DevCD::handleMessages( CDMessage message, unsigned int devID)
@@ -668,6 +684,8 @@ void DevCD::handleMessages( CDMessage message, unsigned int devID)
 bool DevCD::isAudioCDPresent()
 {
     unsigned int&  savedVolume_ = pImpl_-> savedVolume_;
+    bool& musicEnabled_ =  pImpl_->musicEnabled_;
+
     /*DWORD dwReturn;
 
     MCI_STATUS_PARMS mciStatusParms;
@@ -681,9 +699,21 @@ bool DevCD::isAudioCDPresent()
 
     return cdPresent;*/
     // If music is muted then just say no
-    if (savedVolume_ <= 0)
+    if (not musicEnabled_ or savedVolume_ <= 0)
+    {
         return false;
+    }
+
     return true;
+}
+
+void DevCD::enableMusic()
+{
+    pImpl_->musicEnabled_ = true;
+}
+void DevCD::disableMusic()
+{
+    pImpl_->musicEnabled_ = false;
 }
 
 std::ostream& operator <<( std::ostream& o, const DevCD& devCD)
