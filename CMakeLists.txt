@@ -8,14 +8,15 @@ cmake_minimum_required(VERSION 3.14)
 project(machines C CXX)
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
+include(CMakeDependentOption)
 
 ##
 # Project version
 ##
-set(MACHINES_VERSION_CODENAME "Patch 1.5")
+set(MACHINES_VERSION_CODENAME "Patch 1.6")
 set(MACHINES_VERSION_MAJOR    0)
 set(MACHINES_VERSION_MINOR    1)
-set(MACHINES_VERSION_REVISION 1.5)
+set(MACHINES_VERSION_REVISION 1.6)
 
 message(STATUS "Building Machines \"${MACHINES_VERSION_CODENAME}\" (${MACHINES_VERSION_FULL})")
 
@@ -81,12 +82,6 @@ option(BUILD_32 "Builds 32 bit executable" OFF)
 
 # Compiler detection
 #set(CMAKE_CXX_COMPILER "${OMPP_CXX}" CACHE PATH "Set compiler used")
-
-# Testing
-option(BUILD_TESTS "Build the test suite" ON)
-
-# Export compiler commands when building
-option(BUILD_EXPORT_CC_CMDS "Export the compiler commands when building to use with Sourcetrail" ON)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
@@ -155,6 +150,29 @@ set(MACHINES_C_FLAGS "${CMAKE_C_FLAGS} ${NORMAL_C_FLAGS}")
 set(MACHINES_CXX_FLAGS_RELEASE "${RELEASE_CXX_FLAGS}")
 set(MACHINES_CXX_FLAGS_DEBUG "${DEBUG_CXX_FLAGS}")
 
+# Asserts can be enabled/disabled regardless of build type
+option(DEV_BUILD "Enable assert()s and other debug checks" ON)
+
+# Warn about development build
+if(DEV_BUILD)
+    message(STATUS "Building with development extensions")
+endif()
+
+# Testing
+#option(BUILD_TESTS "Build the test suite" off)
+cmake_dependent_option(BUILD_TESTS "Build the test suites" ON "DEV_BUILD" OFF)
+
+# Warn about xbawks huge test binaries
+if(BUILD_TESTS)
+    message(WARNING
+        "The testing binaries are HUGE! Each compiled test suite will be around 25MB.\n"
+        "If this a problem for you, run \"cmake -DBUILD_TESTS=OFF ..\" to disable.")
+endif()
+
+# Export compiler commands when building
+#option(BUILD_EXPORT_CC_CMDS "Export the compiler commands when building to use with Sourcetrail" ON)
+cmake_dependent_option(BUILD_EXPORT_CC_CMDS "Export the compiler commands when building to use with Sourcetrail" ON "DEV_BUILD" OFF)
+
 # Export the compiler commands when building to use with Sourcetrail
 if(BUILD_EXPORT_CC_CMDS)
     if(NOT CMAKE_EXPORT_COMPILE_COMMANDS)
@@ -164,14 +182,6 @@ if(BUILD_EXPORT_CC_CMDS)
     endif()
     message(STATUS "Export of compile commands is set to: ${CMAKE_EXPORT_COMPILE_COMMANDS}")
 endif(BUILD_EXPORT_CC_CMDS)
-
-# Asserts can be enabled/disabled regardless of build type
-option(DEV_BUILD "Enable assert()s and other debug checks" ON)
-
-# Warn about development build
-if(DEV_BUILD)
-    message(STATUS "Building with development extensions")
-endif()
 
 ##
 # Searching for packages
