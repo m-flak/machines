@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include "gui/displaya.hpp"
 #include "machlog/p1handlr.hpp"
 
@@ -32,6 +33,10 @@ public:
     void updateSquadIcon();
     void clearSquadIcon();
 
+    // Update the displayed number that shows which squad is selected
+    void updateSquadNumber();
+    void resetSquadNumber();
+
     // Change command icon states
     void setAttackIconState(CommandIconState state);
     void setFollowIconState(CommandIconState state);
@@ -56,5 +61,11 @@ private:
 
     // Will either point to noSquadronSelected() OR activeSquadIcon_
     GuiBitmap* pActiveSquadIcon_;
+    int64_t    activeSquadNumber_;
     MachLog1stPersonHandler* pLogHandler_;
+
+    // Rendered text of the squad number.
+    // 0 is blank
+    // Squadron ID's from getActiveSquadronId() are 1...10
+    std::map<int64_t, RenSurface*> mapSquadNumbers_;
 };

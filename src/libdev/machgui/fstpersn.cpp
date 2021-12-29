@@ -200,6 +200,7 @@ public:
     // FP Command
     MachGuiFPCommand* pCommandWidget_;
     int64_t commandSquadIndex_;
+    double timeSquadIndexChanged_;
 };
 
 MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
@@ -232,7 +233,8 @@ MachGuiFirstPersonImpl::MachGuiFirstPersonImpl()
 	machineNVGOn_( false ),
     finishedStartupSequence_( false ),
     pCommandWidget_( nullptr ),
-    commandSquadIndex_(-1L)
+    commandSquadIndex_(-1L),
+    timeSquadIndexChanged_(0.0)
 {
 	compassBmp_.enableColourKeying();
 	weaponChargeBmp_.enableColourKeying();
@@ -430,8 +432,9 @@ void MachGuiFirstPerson::update()
 	CB_DEPIMPL( bool, finishedStartupSequence_ )
 	CB_DEPIMPL( bool, isHitInterferenceOn_ );
 	CB_DEPIMPL( int, frameNumber_ );
-    CB_DEPIMPL( int64_t, commandSquadIndex_);
-    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_);
+    CB_DEPIMPL( int64_t, commandSquadIndex_ );
+    CB_DEPIMPL( MachGuiFPCommand*, pCommandWidget_ );
+    CB_DEPIMPL( double, timeSquadIndexChanged_ );
 
 	double now = DevTime::instance().time();
 
@@ -439,6 +442,9 @@ void MachGuiFirstPerson::update()
 	{
 		// Controls when weapon not recharged sound is played.
 		timeWeaponsFired_ = now;
+
+        // Keeps the squad changing from going too fast
+        timeSquadIndexChanged_ = now;
 	}
 
 	// Check to see if we should automatically leave 1st person
@@ -525,26 +531,41 @@ void MachGuiFirstPerson::update()
         // Cycle squadrons for Command
         if( commandList_[COMMAND_SELECT_NEXT].on() )
         {
-            // start over if need be
-            if (++commandSquadIndex_ > 9)
+            // prevent super-fast cycling
+            if (now - timeSquadIndexChanged_ >= 0.15)
             {
-                commandSquadIndex_ = 0;
+                // start over if need be
+                if (++commandSquadIndex_ > 9)
+                {
+                    commandSquadIndex_ = 0;
+                }
+
+                const_cast<MachLog1stPersonActiveSquadron&>(logHandler.getActiveSquadron()).setActiveSquadron(commandSquadIndex_);
+                pCommandWidget_->updateSquadIcon();
+                pCommandWidget_->updateSquadNumber();
+
+                // If commandSquadIndex didn't point to an empty squad, update time variable.
+                timeSquadIndexChanged_ = ((logHandler.getActiveSquadron().getActiveSquadronId()-1^commandSquadIndex_) == 0) ? now : timeSquadIndexChanged_;
             }
-
-            const_cast<MachLog1stPersonActiveSquadron&>(logHandler.getActiveSquadron()).setActiveSquadron(commandSquadIndex_);
-            pCommandWidget_->updateSquadIcon();
-
         }
         if( commandList_[COMMAND_SELECT_PREV].on() )
         {
-            // roll back over to end
-            if (--commandSquadIndex_ < 0)
+            // prevent super-fast cycling
+            if (now - timeSquadIndexChanged_ >= 0.15)
             {
-                commandSquadIndex_ = 9;
-            }
+                // roll back over to end
+                if (--commandSquadIndex_ < 0)
+                {
+                    commandSquadIndex_ = 9;
+                }
 
-            const_cast<MachLog1stPersonActiveSquadron&>(logHandler.getActiveSquadron()).setActiveSquadron(commandSquadIndex_);
-            pCommandWidget_->updateSquadIcon();
+                const_cast<MachLog1stPersonActiveSquadron&>(logHandler.getActiveSquadron()).setActiveSquadron(commandSquadIndex_);
+                pCommandWidget_->updateSquadIcon();
+                pCommandWidget_->updateSquadNumber();
+
+                // If commandSquadIndex didn't point to an empty squad, update time variable.
+                timeSquadIndexChanged_ = ((logHandler.getActiveSquadron().getActiveSquadronId()-1^commandSquadIndex_) == 0) ? now : timeSquadIndexChanged_;
+            }
         }
 
         // The command icons should not light up if there's nobody selected. This value will be used more further down...
@@ -1687,6 +1708,7 @@ void MachGuiFirstPerson::embodyActor()
         if (pLogHandler_->getActiveSquadron().hasActiveSquadron())
         {
             pCommandWidget_->updateSquadIcon();
+            pCommandWidget_->updateSquadNumber();
         }
 
 		W4dEntity* thisEntity = _STATIC_CAST(W4dEntity*, &(pActor_->asMachine().physMachine()));
@@ -1724,6 +1746,7 @@ void MachGuiFirstPerson::exitActor()
     // RESET COMMAND WIDGET
     pCommandWidget_->resetLogHandler();
     pCommandWidget_->clearSquadIcon();
+    pCommandWidget_->resetSquadNumber();
     commandSquadIndex_ = -1L;
 
 	// Put selection box back round actor.

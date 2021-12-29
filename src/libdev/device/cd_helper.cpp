@@ -1,10 +1,11 @@
 #include "device/cd_helper.hpp"
 
+#include "base/compiler.hpp"    // For WEAK_SYMBOL def
 #include "device/cd.hpp"
 #include "device/DevCDImpl.hpp"
 #include "system/registry.hpp"
 
-void device::helper::cd::configure(DevCD* cd)
+WEAK_SYMBOL void device::helper::cd::configure(DevCD* cd)
 {
     constexpr char configEnableMusic[] = "Options\\Music\\enabled";
     auto configValue                   = std::string{};
