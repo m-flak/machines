@@ -11,6 +11,7 @@ macro(append_test test_name test_srcs)
 endmacro(append_test)
 
 # Can't use `libs` because some libraries had to be substituted, like `afx` ':^/
+# # You can still unit test afx lib's classes, except for AfxSdlApp
 set(TESTING_THESE_GUYS
     base
     mathex
@@ -38,6 +39,8 @@ set(TESTING_THESE_GUYS
 )
 
 #### Test Cases
+#~:afx
+append_test(AfxConfigurationTests afx/AfxConfigurationTests.cpp)
 #~:ani
 append_test(FrameScalerTests ani/FrameScalerTests.cpp)
 #~:device

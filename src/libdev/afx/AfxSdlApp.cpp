@@ -80,8 +80,8 @@ bool AfxSdlApp::OSStartup()
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, configuration_.getConfig().multisampleBuffers);
+    SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, configuration_.getConfig().multisampleSamples);
 
     pWindow_ = SDL_CreateWindow(
         name().c_str(),

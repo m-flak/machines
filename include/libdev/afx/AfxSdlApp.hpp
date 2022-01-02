@@ -1,6 +1,7 @@
 #pragma once
 
 #include "afx/app.hpp"
+#include "AfxConfiguration.hpp"
 
 #include <SDL2/SDL.h>
 
@@ -48,4 +49,7 @@ private:
     bool finishing_{ false};
     bool finished_{ false};
     SDL_Window* pWindow_;
+
+    // Config values needed at startup
+    AfxConfiguration configuration_;
 } ;

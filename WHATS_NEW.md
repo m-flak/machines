@@ -12,6 +12,7 @@
 ### ⭐ Graphics
 
 - Anti-aliasing. It makes a difference.
+- AA is configurable, in config.xml: `<key name="Options\MSAA\Buffers">1</key>` and `<key name="Options\MSAA\Samples">8</key>`
 - Full Screen Cinematics.  Just like the old days (:
 
 ### ⭐ Miscellaneous
