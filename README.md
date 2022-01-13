@@ -67,6 +67,9 @@ Extra parameters for release optimizations:
 
 For ARM SoC development boards (like Raspberry or Nitrogen8M) if you do not have cross compilation toolchain prepared it will be easier to boot-up one of dedicated system distribution and build it within this enviroment (takes approx one hour for 4 cores).
 
+**Making a distribution (Collect everything for installation)**
+Run `make distribution` to collect all of the data files, graphics files, and compiled binaries into a single folder. You may then copy the contents of the `distribution` folder into your game's directory.
+
 **Class invariant checks (for debugging)**
 `export CB_INVARIANT_CHECKING=on`
 
