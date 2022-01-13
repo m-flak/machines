@@ -301,7 +301,6 @@ MATHEX_SCALAR MachLog1stPersonHandler::maxWeaponRange() const
 
 void MachLog1stPersonHandler::acquireTargetingInfo(TargetingInfo& targetInfo) const
 {
-    bool hadNearer = false;
     bool hadFarther = false;
 
     // If we have the nearer hit entity, the one in weapon's range, we will not have the farther one
@@ -332,9 +331,6 @@ void MachLog1stPersonHandler::acquireTargetingInfo(TargetingInfo& targetInfo) co
         {
             targetInfo.strikeType = MachPhys::ON_TERRAIN;
         }
-
-        // Set the near point
-        hadNearer = true;
     }
     else if ( pData_->pPhysDriver_->hasFarCmdHitEntity() )
     {
@@ -368,11 +364,11 @@ void MachLog1stPersonHandler::acquireTargetingInfo(TargetingInfo& targetInfo) co
         hadFarther = true;
     }
 
-    if (hadNearer)
-    {
-        targetInfo.shootingPoint = pData_->pPhysDriver_->hitPoint();
-    }
-    else if (hadFarther)
+    // The shootingPoint field defaults to <0,0,0>
+    // Always set this or guns will shoot sideways when targets are invalid / OoR
+    targetInfo.shootingPoint = pData_->pPhysDriver_->hitPoint();
+
+    if (hadFarther)
     {
         targetInfo.commandPoint = pData_->pPhysDriver_->farCmdHitPoint();
     }
